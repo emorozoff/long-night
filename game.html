@@ -403,7 +403,7 @@ h1,h2,.serif{font-family:var(--pix);}
    ===================================================================== */
 
 // ============================== UTILS ==============================
-const VERSION='0.41';
+const VERSION='0.42';
 const TAU = Math.PI*2;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const irand=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
@@ -3306,8 +3306,7 @@ function devAction(act,arg){
     case 'xpclear': window.__xplog=[]; { const di=$('devInfo'); if(di) di.textContent='XP-лог очищен'; } break;
   }
 }
-let _devTaps=0,_devTapT=0;
-function devTapVersion(){ const n=performance.now(); if(n-_devTapT>1500)_devTaps=0; _devTapT=n; if(++_devTaps>=5){_devTaps=0; toggleDev(true);} }
+function devTapVersion(){ toggleDev(true); } // дев-панель открывается с ОДНОГО нажатия по версии
 function loop(ts){
   requestAnimationFrame(loop);
   if(!lastTS)lastTS=ts;
