@@ -115,7 +115,15 @@ h1,h2,.serif{font-family:Georgia,'Times New Roman',serif;}
 .toggle.on{background:#3a1520;border-color:var(--red);}
 .toggle.on::after{left:38px;background:var(--gold);}
 .vertag{color:var(--dim);font-size:12px;letter-spacing:3px;margin-top:-4px;}
-#verCorner{position:fixed;left:8px;bottom:6px;z-index:11;color:rgba(150,130,140,0.45);font-size:11px;letter-spacing:1px;pointer-events:none;}
+#verCorner{position:fixed;left:8px;bottom:6px;z-index:60;color:rgba(150,130,140,0.45);font-size:11px;letter-spacing:1px;pointer-events:auto;}
+#devPanel{position:fixed;inset:0;z-index:200;background:rgba(8,8,12,0.93);color:#cde;font:12px/1.4 ui-monospace,monospace;padding:10px 12px 40px;overflow:auto;display:none;}
+#devPanel.show{display:block;}
+#devPanel h3{margin:2px 0 6px;font:bold 14px monospace;color:#7ad4ff;letter-spacing:1px;}
+.dvh{margin:10px 0 3px;color:#e7c24a;font-weight:bold;border-bottom:1px solid #333;padding-bottom:2px;}
+.dvrow{display:flex;flex-wrap:wrap;gap:4px;margin-bottom:3px;}
+.dvb{background:#1c2230;color:#cde;border:1px solid #3a4860;border-radius:4px;padding:5px 9px;font:12px monospace;cursor:pointer;}
+.dvb:hover{background:#2a3550;}
+#devClose,[data-act="close"]{background:#5a1c28;border-color:#8a3a4a;}
 #btnFull{position:fixed;right:10px;bottom:8px;z-index:12;width:36px;height:36px;display:flex;align-items:center;justify-content:center;
   font-size:19px;color:rgba(205,185,195,0.6);background:rgba(20,12,18,0.5);border:1px solid #3a2230;border-radius:7px;cursor:pointer;pointer-events:auto;transition:.12s;}
 #btnFull:hover{color:#fff;border-color:var(--red);}
@@ -254,6 +262,7 @@ h1,h2,.serif{font-family:Georgia,'Times New Roman',serif;}
 <div id="banner"><div id="bannerBig"></div><div id="bannerSmall"></div></div>
 <div id="btnPauseTouch">❚❚</div>
 <div id="verCorner"></div>
+<div id="devPanel"></div>
 <div id="btnFull" title="Полный экран">⛶</div>
 
 <div id="scrMenu" class="screen">
@@ -375,7 +384,7 @@ h1,h2,.serif{font-family:Georgia,'Times New Roman',serif;}
    ===================================================================== */
 
 // ============================== UTILS ==============================
-const VERSION='0.29';
+const VERSION='0.30';
 const TAU = Math.PI*2;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const irand=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
@@ -572,12 +581,14 @@ const A={
 };
 
 // ============================== ЛОКАЦИИ ==============================
+// boss = индекс финального босса локации в BOSSES (план C: общая тройка #0–2 + свой финал #3–7).
+// Темы/названия локаций перерабатываются в Tier 3 под боссов; пока сохраняем текущие.
 const LOCS=[
-  {id:'grave', name:'ПОГОСТ',        desc:'классическая вечная ночь', req:0,   gold:0},
-  {id:'swamp', name:'КРОВАВАЯ ТОПЬ', desc:'лужи замедляют всех · слизней больше · +15% золота', req:240, gold:0.15},
-  {id:'ash',   name:'ПЕПЕЛИЩЕ',      desc:'огненные разломы · элита чаще · +25% золота', req:420, gold:0.25},
-  {id:'crypt', name:'ЗАТОПЛЕННЫЙ СКЛЕП', desc:'ледяная вода замедляет нечисть (не тебя) · +20% золота', req:600, gold:0.20},
-  {id:'inferno',name:'ПРЕИСПОДНЯЯ',  desc:'частые огненные разломы · элита и громилы · +35% золота', req:840, gold:0.35},
+  {id:'grave', name:'ПОГОСТ',        desc:'классическая вечная ночь', req:0,   gold:0,    boss:3},
+  {id:'swamp', name:'КРОВАВАЯ ТОПЬ', desc:'лужи замедляют всех · слизней больше · +15% золота', req:240, gold:0.15, boss:4},
+  {id:'ash',   name:'ПЕПЕЛИЩЕ',      desc:'огненные разломы · элита чаще · +25% золота', req:420, gold:0.25, boss:5},
+  {id:'crypt', name:'ЗАТОПЛЕННЫЙ СКЛЕП', desc:'ледяная вода замедляет нечисть (не тебя) · +20% золота', req:600, gold:0.20, boss:6},
+  {id:'inferno',name:'ПРЕИСПОДНЯЯ',  desc:'частые огненные разломы · элита и громилы · +35% золота', req:840, gold:0.35, boss:7},
 ];
 
 // ============================== META (мета-прогрессия) ==============================
@@ -843,10 +854,12 @@ function buildSprites(){
     syn:ico(['.....g.....','..g..g..g..','...ggggg...','..ggg.ggg..','...gg.gg...','..g.....g..']),
   };
   // белые версии для вспышки урона
-  for(const k of ['player','zombie','bat','slime','spitter','brute','warper','boss'])
+  // белые версии для вспышки урона — перебор по ENEMY_MAPS, новые враги авто-получают вспышку
+  SPR.player_w=whiteOf(SPR.player); SPR.boss_w=whiteOf(SPR.boss);
+  for(const k in ENEMY_MAPS){
     SPR[k+'_w']=whiteOf(SPR[k]);
-  for(const k of ['zombie','bat','slime','spitter','brute','warper'])
-    SPR[k+'_wa']=whiteOf(SPR[k+'_a']);
+    if(SPR[k+'_a']) SPR[k+'_wa']=whiteOf(SPR[k+'_a']);
+  }
   // --- кристаллы опыта ---
   const gem=(c1,c2)=>mkCanvas(18,18,g=>{
     g.translate(9,9);
@@ -1012,8 +1025,31 @@ function buildSprites(){
   };
   SPR.decors.crypt=SPR.decors.grave;   // кости/черепа в склепе
   SPR.decors.inferno=SPR.decors.ash;   // угли/пепел в преисподней
+  // препятствия (твёрдые) — общий каменный набор; по локациям доработаем в Tier 3
+  {
+    const OBPAL={S:'#7c776f',s:'#5e5952',d:'#3a352f',m:'#2a2622'};
+    const ob=rows=>px(rows,OBPAL,5,'#15120f');
+    SPR.obst={ def:[
+      ob(['.ssss.','sSSSSs','sSSSSs','sSddSs','sSSSSs','sSSSSs','ssssss','.dmmd.']),
+      ob(['..ss..','.sSSs.','sSSSSs','sSSSSs','ssddss','.dmmd.'])
+    ]};
+  }
 }
 buildSprites();
+// препятствия: редкие твёрдые коллайдеры, детерминированно по миру; тормозят ТОЛЬКО игрока
+const OBST_CELL=360, OBST_R=15;
+function obstacleAt(cx,cy){
+  if(hash2(cx*131+7,cy*131+91)>0.15) return null;   // редко — немного препятствий на экране
+  const ox=cx*OBST_CELL+50+hash2(cx+555,cy)*(OBST_CELL-100);
+  const oy=cy*OBST_CELL+50+hash2(cx,cy+555)*(OBST_CELL-100);
+  if(ox*ox+oy*oy<140*140) return null;              // чистим зону старта (0,0)
+  return {x:ox,y:oy,r:OBST_R,k:(hash2(cx+7,cy+3)*997|0)};
+}
+function forObstaclesNear(x,y,margin,fn){
+  const c0x=Math.floor((x-margin)/OBST_CELL),c1x=Math.floor((x+margin)/OBST_CELL);
+  const c0y=Math.floor((y-margin)/OBST_CELL),c1y=Math.floor((y+margin)/OBST_CELL);
+  for(let cy=c0y;cy<=c1y;cy++)for(let cx=c0x;cx<=c1x;cx++){const o=obstacleAt(cx,cy);if(o)fn(o);}
+}
 // кровавые лужи Топи: детерминированы координатами мира
 function poolAt(cx,cy){
   const h=hash2(cx*7+13,cy*11+7);
@@ -1031,13 +1067,13 @@ function inPool(x,y){
 
 // ============================== RUN STATE ==============================
 const ETYPES={
-  zombie:{r:14, hp:18,  spd:55,  dmg:8,  xp:1},
-  bat:   {r:9,  hp:7,   spd:128, dmg:5,  xp:1},
-  slime: {r:16, hp:32,  spd:42,  dmg:9,  xp:2},
-  spitter:{r:13,hp:26,  spd:70,  dmg:7,  xp:3},
-  brute: {r:24, hp:150, spd:30,  dmg:22, xp:8},
-  warper:{r:12, hp:34,  spd:62,  dmg:12, xp:4},
-  boss:  {r:42, hp:1500,spd:42,  dmg:20, xp:120},
+  zombie: {r:14, hp:18,  spd:55,  dmg:8,  xp:1,   behav:'chase'},
+  bat:    {r:9,  hp:7,   spd:128, dmg:5,  xp:1,   behav:'swarm'},
+  slime:  {r:16, hp:32,  spd:42,  dmg:9,  xp:2,   behav:'hop'},
+  spitter:{r:13, hp:26,  spd:70,  dmg:7,  xp:3,   behav:'ranged'},
+  brute:  {r:24, hp:150, spd:30,  dmg:22, xp:8,   behav:'tank'},
+  warper: {r:12, hp:34,  spd:62,  dmg:12, xp:4,   behav:'warp'},
+  boss:   {r:42, hp:1500,spd:42,  dmg:20, xp:120, behav:'boss'},
 };
 const ENAMES={zombie:'Упыри',bat:'Нетопыри',slime:'Слизни',spitter:'Плевуны',brute:'Громилы',warper:'Бесы',elite:'Элита',boss:'Боссы'};
 const ENEMY_INFO={
@@ -1050,7 +1086,18 @@ const ENEMY_INFO={
   boss:{name:'Боссы',desc:'Носферату и его слуги. Приходят каждые 3 минуты, бьются по фазам.'},
 };
 const WSTAT={bolt:'Арбалет',orbit:'Серебряные клинки',chain:'Цепная молния',aura:'Освящённая земля',scythe:'Метательный крест',mortar:'Святая вода',bell:'Колокол',lantern:'Фонарь',bleed:'Кровотечение',shatter:'Кара света',rift:'Огненные разломы',nova_rev:'Святые мощи',bomb:'Бомба'};
-const BOSS_NAMES=['НОСФЕРАТУ','КОСТЯНОЙ ГОЛЕМ','МАТЕРЬ РОЯ','КРОВАВЫЙ КОРОЛЬ'];
+// ростер боссов — фиксированный порядок появления (план C). kind = ключ механики (диспатч в bossUpdate).
+// Механики пока generic (дефолт), реальные добавляются по одному (пилот — matron).
+const BOSSES=[
+  {id:'matron',   name:'МАТЕРЬ РОЯ',     kind:'matron'},
+  {id:'maneater', name:'ЛЮДОЕД',         kind:'maneater'},
+  {id:'flayer',   name:'ГНИЛОЙ ПАЛАЧ',   kind:'flayer'},
+  {id:'drowned',  name:'УТОПЛЕННИЦА',    kind:'drowned'},
+  {id:'shepherd', name:'ТЁМНЫЙ ПАСТЫРЬ', kind:'shepherd'},
+  {id:'gravedig', name:'МОГИЛЬЩИК',      kind:'gravedigger'},
+  {id:'maiden',   name:'БЛЕДНАЯ ДЕВА',   kind:'maiden'},
+  {id:'deadking', name:'МЁРТВЫЙ КОРОЛЬ', kind:'deadking'},
+];
 
 let eid=1;
 const CELL=72, grid=new Map();
@@ -1100,7 +1147,7 @@ function newRun(){
     rings:[], lanternAim:0,
     taken:{}, leechPool:0,
     rerolls:3+(m.rerolls||0), banishes:1, banished:{}, banishMode:false, evo:{},
-    spawnT:1.4, waveT:55, eliteT:115, bossT:180, bossTier:0, bossRef:null,
+    spawnT:1.4, waveT:55, eliteT:115, bossT:180, bossIdx:0, bossTier:0, bossRef:null,
     finalSpawned:false, won:false,
     combo:0, comboT:0, comboMax:0,
     goldBonus:0, earned:0,
@@ -1454,7 +1501,7 @@ function spawnEnemy(type,x,y,o={}){
   const hpMul=o.noScale?1:1+0.55*m+0.17*m*m;
   const dmgMul=o.noScale?1:1+0.22*m;
   const e={
-    id:eid++, type, x, y, r:b.r,
+    id:eid++, type, behav:b.behav||'chase', x, y, r:b.r,
     hp:Math.round(b.hp*hpMul), maxhp:Math.round(b.hp*hpMul),
     spd:b.spd*(o.noScale?1:1+Math.min(0.4,m*0.045))*rand(0.9,1.1),
     dmg:b.dmg*dmgMul,
@@ -1822,19 +1869,20 @@ function updateEnemies(dt){
     const d=Math.sqrt(dx*dx+dy*dy)||1;
     let mvx=0,mvy=0;
     if(e.boss){ bossUpdate(e,dt,dx,dy,d,sf); }
-    else switch(e.type){
-      case 'zombie':
+    else switch(e.behav){
+      default:
+      case 'chase':
         mvx=dx/d*e.spd; mvy=dy/d*e.spd; break;
-      case 'bat':{
+      case 'swarm':{
         const a=Math.atan2(dy,dx)+Math.sin(e.t*3.2+e.id)*0.65;
         mvx=Math.cos(a)*e.spd; mvy=Math.sin(a)*e.spd; break;
       }
-      case 'slime':{
+      case 'hop':{
         const hop=Math.max(0,Math.sin(e.t*4.2));
         const k=0.25+hop*1.3;
         mvx=dx/d*e.spd*k; mvy=dy/d*e.spd*k; break;
       }
-      case 'spitter':{
+      case 'ranged':{
         const range=330;
         if(d>range){mvx=dx/d*e.spd;mvy=dy/d*e.spd;}
         else if(d<range-70){mvx=-dx/d*e.spd*0.8;mvy=-dy/d*e.spd*0.8;}
@@ -1847,11 +1895,11 @@ function updateEnemies(dt){
         }
         break;
       }
-      case 'brute':{
+      case 'tank':{
         const enr=e.hp<e.maxhp*0.3?1.8:1;
         mvx=dx/d*e.spd*enr; mvy=dy/d*e.spd*enr; break;
       }
-      case 'warper':{
+      case 'warp':{
         if(e.dashT>0){
           e.dashT-=dt; mvx=e.dvx; mvy=e.dvy;
         } else {
@@ -1921,7 +1969,9 @@ function updateEnemies(dt){
 }
 
 // ============================== BOSS ==============================
+const BOSS_MECH={}; // механики по боссу (ключ = bkind); пусто = generic-логика ниже. Заполняется по мере добавления боссов.
 function bossUpdate(e,dt,dx,dy,d,sf){
+  const mech=BOSS_MECH[e.bkind]; if(mech){ mech(e,dt,dx,dy,d,sf); return; }
   const f=e.hp/e.maxhp, tier=e.boss;
   e.phase=f>0.66?0:f>0.33?1:2;
   // движение: телеграф рывка / рывок / погоня
@@ -1995,26 +2045,29 @@ function bossUpdate(e,dt,dx,dy,d,sf){
     }
   }
 }
-function spawnBoss(tier){
+function spawnBoss(idx, isFinal){
   const p=run.p;
+  const def=BOSSES[idx]||BOSSES[0];
   const a=rand(0,TAU), R=Math.max(W,H)*0.55+100;
   const e=spawnEnemy('boss',p.x+Math.cos(a)*R,p.y+Math.sin(a)*R,{noScale:true});
-  e.boss=tier;
-  e.name=BOSS_NAMES[(tier-1)%BOSS_NAMES.length]+(tier>BOSS_NAMES.length?' '+(Math.floor((tier-1)/BOSS_NAMES.length)+1):'');
+  const tier=idx+1;
+  e.boss=tier; e.bkind=def.kind; e.name=def.name;
   const m=run.time/60;
-  e.maxhp=e.hp=Math.round(1300*Math.pow(tier,1.5)*(1+m*0.12));
-  e.r=42; e.spd=42; e.dmg=(16+8*tier)*(1+m*0.1);
-  e.xp=Math.round(120*tier*(1+m*0.12));
+  e.maxhp=e.hp=Math.round(1100*Math.pow(tier,1.45)*(1+m*0.10));
+  e.r=42; e.spd=42; e.dmg=(15+7*tier)*(1+m*0.1);
+  e.xp=Math.round(110*tier*(1+m*0.12));
   e.sumNext=true; e.a1=2.5; e.a2=6;
+  if(isFinal){ e.final=true; e.maxhp=e.hp=Math.round(e.maxhp*1.6); e.r=50; e.dmg*=1.15; }
   run.bossRef=e;
-  showBanner(e.name,'БОСС');
-  A.roar();
+  showBanner(e.name, isFinal?'ФИНАЛ НОЧИ — победи и переживи':'БОСС', isFinal?3200:1800);
+  A.roar(); if(isFinal) shakeAdd(20);
   return e;
 }
-const WIN_TIME=900; // 15:00 — приходит финальный босс; победить его = пережить ночь
-function spawnFinalBoss(){
-  const e=spawnBoss(99);
-  e.final=true; e.name='ВЕЧНЫЙ ВАМПИР';
+const WIN_TIME=900; // (устар.) старый таймер финала — не используется при плане C
+const BOSS_INTERVAL=180; // план C: интервал появления боссов (ручка темпа)
+function spawnFinalBoss(){ // (устар.) оставлено на всякий случай; директор больше не вызывает
+  const e=spawnBoss(BOSSES.length-1, true);
+  e.final=true;
   const m=run.time/60;
   e.maxhp=e.hp=Math.round(42000*(1+(m-15)*0.08));
   e.r=54; e.dmg=72; e.xp=2500;
@@ -2108,14 +2161,12 @@ function director(dt){
       showBanner('','элита близко...');
     }
   }
-  if(t>=WIN_TIME&&!run.finalSpawned){
-    run.finalSpawned=true;
-    spawnFinalBoss();
-  }
-  if(!run.finalSpawned&&t>=run.bossT){
-    run.bossTier++;
-    spawnBoss(run.bossTier);
-    run.bossT+=180;
+  // боссы — фиксированный порядок (план C); финал = босс-кап локации, его смерть = победа над ночью
+  const cap=(LOCS.find(l=>l.id===run.loc)||LOCS[0]).boss;
+  if(!run.won&&run.bossIdx<=cap&&t>=run.bossT){
+    spawnBoss(run.bossIdx, run.bossIdx===cap);
+    run.bossIdx++;
+    run.bossT+=BOSS_INTERVAL;
   }
 }
 
@@ -2133,6 +2184,11 @@ function updatePlayer(dt){
   if(dx) p.face=dx>0?1:-1;
   const spd=230*p.spdMul*(run.loc==='swamp'&&inPool(p.x,p.y)?0.84:1);
   p.x+=dx*spd*dt; p.y+=dy*spd*dt;
+  // коллизия с препятствиями — тормозят ТОЛЬКО игрока (враги/снаряды проходят сквозь)
+  forObstaclesNear(p.x,p.y,p.r+OBST_R+6,o=>{
+    const ox=p.x-o.x,oy=p.y-o.y,rr=p.r+o.r,d2=ox*ox+oy*oy;
+    if(d2<rr*rr&&d2>0.0001){const dd=Math.sqrt(d2),push=(rr-dd)/dd;p.x+=ox*push;p.y+=oy*push;}
+  });
   p.moving=!!(dx||dy);
   if(p.moving){p.mx=dx;p.my=dy;}
   if(p.inv>0)p.inv-=dt;
@@ -2434,6 +2490,12 @@ function drawGround(px,py){
     }
   }
   ctx.globalAlpha=1;
+  // препятствия (твёрдые) — поверх земли/декора
+  const obSpr=(SPR.obst&&SPR.obst[loc])||SPR.obst.def;
+  forObstaclesNear(px,py,Math.max(W,H)/2+OBST_CELL,o=>{
+    const s=obSpr[o.k%obSpr.length];
+    ctx.drawImage(s,Math.round(o.x-s.width/2),Math.round(o.y-s.height+6));
+  });
 }
 function drawZones(){
   const p=run.p;
@@ -2862,6 +2924,55 @@ const MUSIC={
 // ============================== MAIN LOOP ==============================
 let lastTS=0;
 const fpsBuf=new Float32Array(90); let fpsI=0;
+// ============================== DEV-ПАНЕЛЬ (секретный жест: 5 тапов по версии) ==============================
+let devTimescale=1;
+function toggleDev(on){ const d=$('devPanel'); if(!d) return; if(on){ buildDevPanel(); d.classList.add('show'); } else d.classList.remove('show'); }
+function buildDevPanel(){
+  const bq=(act,arg,label)=>`<button class="dvb" data-act="${act}"${arg!=null?` data-arg="${arg}"`:''}>${label}</button>`;
+  const H=t=>`<div class="dvh">${t}</div>`, R=s=>`<div class="dvrow">${s}</div>`;
+  const wkeys=Object.keys((run&&run.weapons)||{bolt:0,orbit:0,chain:0,aura:0,scythe:0,mortar:0,bell:0,lantern:0});
+  $('devPanel').innerHTML=
+    bq('close',null,'✕ закрыть')+
+    `<h3>РЕЖИМ РАЗРАБОТЧИКА · v${VERSION}</h3>`+
+    H('Старт локации (герой: '+meta.hero+')')+R(LOCS.map(l=>bq('loc',l.id,l.name)).join(''))+
+    H('Сменить героя')+R(HEROES.map(h=>bq('hero',h.id,h.name)).join(''))+
+    H('Заспавнить босса')+R(BOSSES.map((b,i)=>bq('boss',i,i+':'+b.name)).join(''))+
+    H('Заспавнить как ФИНАЛ (победа при убийстве)')+R(BOSSES.map((b,i)=>bq('bossfin',i,b.name)).join(''))+
+    R(bq('killboss',null,'убить босса')+bq('killall',null,'убить всех'))+
+    H('Оружие')+R(wkeys.map(k=>bq('wpn',k,(WSTAT[k]||k))).join(''))+
+    R(bq('wpnall',null,'всё максом')+bq('wpnclear',null,'очистить')+bq('passall',null,'все пассивки'))+
+    H('Прокачка / время')+R(bq('lvl',1,'+1 ур')+bq('lvl',5,'+5 ур')+bq('gold',1000,'+1000 зол')+bq('warp',30,'+30с')+bq('warp',60,'+60с')+bq('warp',180,'+180с'))+
+    H('Скорость времени')+R(bq('ts',0.25,'0.25×')+bq('ts',0.5,'0.5×')+bq('ts',1,'1×')+bq('ts',2,'2×'))+
+    H('Читы')+R(bq('god',null,'бог-мод')+bq('heal',null,'лечить')+bq('killself',null,'убить себя'))+
+    H('Заспавнить 30 врагов')+R(Object.keys(ETYPES).filter(k=>k!=='boss').map(k=>bq('spawn',k,k)).join(''))+
+    `<div id="devInfo"></div>`;
+}
+function devAction(act,arg){
+  const ensure=()=>{ if(!run){ __game.start(); __game.god(true); } };
+  switch(act){
+    case 'close': toggleDev(false); break;
+    case 'loc': meta.loc=arg; __game.start(); __game.god(true); toggleDev(false); break;
+    case 'hero': meta.hero=arg; buildDevPanel(); break;
+    case 'boss': ensure(); __game.boss(+arg,false); break;
+    case 'bossfin': ensure(); __game.boss(+arg,true); break;
+    case 'killboss': if(run&&run.bossRef&&!run.bossRef.dead) damageEnemy(run.bossRef,1e9,'dev'); break;
+    case 'killall': if(run) __game.clearEnemies(); break;
+    case 'wpn': if(run){ run.weapons[arg]=Math.min(8,(run.weapons[arg]||0)+1); refreshItems(); } break;
+    case 'wpnall': if(run){ for(const k in run.weapons) run.weapons[k]=Math.max(run.weapons[k]||0,4); refreshItems(); } break;
+    case 'wpnclear': if(run){ for(const k in run.weapons) run.weapons[k]=0; refreshItems(); } break;
+    case 'passall': if(run){ UPGRADES.forEach(u=>{ try{ if(u.kind!=='w'&&u.apply) u.apply(run); }catch(e){} }); refreshItems(); } break;
+    case 'lvl': toggleDev(false); if(run){ const n=+arg; for(let i=0;i<n;i++) __game.levelup(); } break;
+    case 'gold': __game.gold(+arg); break;
+    case 'warp': if(run) __game.warp(+arg); break;
+    case 'ts': devTimescale=+arg; break;
+    case 'god': if(run) run.p.god=!run.p.god; break;
+    case 'heal': if(run) run.p.hp=run.p.maxhp; break;
+    case 'killself': if(run) __game.kill(); break;
+    case 'spawn': if(run) __game.spawn(arg,30); break;
+  }
+}
+let _devTaps=0,_devTapT=0;
+function devTapVersion(){ const n=performance.now(); if(n-_devTapT>1500)_devTaps=0; _devTapT=n; if(++_devTaps>=5){_devTaps=0; toggleDev(true);} }
 function loop(ts){
   requestAnimationFrame(loop);
   if(!lastTS)lastTS=ts;
@@ -2869,7 +2980,7 @@ function loop(ts){
   if(dt>0.1)dt=0.1;
   fpsBuf[fpsI++%90]=dt;
   if(hitStop>0) hitStop-=dt;
-  if(state==='playing'&&run) update(Math.min(dt,0.05)*(hitStop>0?0.12:1));
+  if(state==='playing'&&run) update(Math.min(dt,0.05)*(hitStop>0?0.12:1)*devTimescale);
   render();
   A.intensity=(state==='playing'&&run)
     ? clamp(0.22+run.time/420*0.55+run.en.length/300*0.2+(run.bossRef&&!run.bossRef.dead?0.15:0),0,1)
@@ -3164,7 +3275,7 @@ window.__game={
   start(){startRun();},
   fps(){let s=0,n=0;for(const v of fpsBuf){if(v>0){s+=v;n++;}}return n&&s>0?Math.round(n/s):0;},
   spawn(type,n,o){type=type||'zombie';n=n||1;for(let i=0;i<n;i++)spawnAt(type,o||{});return run.en.length;},
-  boss(tier){return spawnBoss(tier||1);},
+  boss(i,fin){return spawnBoss(i||0,!!fin);},  // i = индекс в BOSSES (0=Матерь роя … 7=Мёртвый король)
   warp(s){if(run)run.time+=s;},
   god(v){if(run)run.p.god=v!==false;},
   kill(){if(run){run.p.god=false;run.p.inv=0;run.revives=0;damagePlayer(99999,'debug');}},
@@ -3180,6 +3291,8 @@ window.__game={
 // PWA: установка на телефон + офлайн после первой загрузки
 if('serviceWorker' in navigator){ addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{})); }
 $('verCorner').textContent='v'+VERSION;
+$('verCorner').addEventListener('click', devTapVersion);
+$('devPanel').addEventListener('click', e=>{ const b=e.target.closest('button[data-act]'); if(b) devAction(b.dataset.act, b.dataset.arg); });
 setState('menu');
 requestAnimationFrame(loop);
 </script>
