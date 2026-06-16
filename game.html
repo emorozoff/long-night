@@ -222,7 +222,10 @@ h1,h2,.serif{font-family:var(--pix);}
 .lvlbtn.act{border-color:var(--red);color:#ff9aa6;box-shadow:0 0 12px #d4203a55;}
 .badge.evo{background:linear-gradient(180deg,#6a4a10,#3a2a08);color:var(--gold);box-shadow:0 0 8px #e7c24a55;}
 .card.evocard{border-color:var(--gold);box-shadow:0 0 22px #e7c24a44;}
+.card.fusioncard{border-color:#c77dff;box-shadow:0 0 22px #c77dff55;}
+.badge.fuse{background:#3a1f5a;color:#e0c0ff;border:1px solid #c77dff;}
 .ichip.evo{border-color:var(--gold);box-shadow:0 0 8px #e7c24a66;}
+.ichip.fused{border-color:#c77dff;box-shadow:0 0 8px #c77dff88;}
 .card.banish{outline:2px solid var(--red);}
 .card.banish::after{content:'ИЗГНАТЬ';position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--pix);font-size:20px;letter-spacing:3px;color:#ff7a86;background:rgba(40,8,12,0.5);border-radius:10px;}
 
@@ -400,7 +403,7 @@ h1,h2,.serif{font-family:var(--pix);}
    ===================================================================== */
 
 // ============================== UTILS ==============================
-const VERSION='0.40';
+const VERSION='0.41';
 const TAU = Math.PI*2;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const irand=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
@@ -1207,7 +1210,7 @@ function newRun(){
     wt:{bolt:0.4,chain:0,aura:0,scythe:0.8,mortar:1.2,bell:1.2,lantern:0}, orbA:0, auraR:0,
     rings:[], lanternAim:0, bladePts:[], wardEvery:6.5, wardCD:6.5, wardReady:false, swords:[],
     taken:{}, leechPool:0,
-    rerolls:(mb.rerolls||0)+(m.rerolls||0), banishes:1, banished:{}, banishMode:false, evo:{},
+    rerolls:(mb.rerolls||0)+(m.rerolls||0), banishes:1, banished:{}, banishMode:false, evo:{}, fused:{},
     spawnT:1.4, waveT:55, eliteT:115, bossT:180, bossIdx:0, bossTier:0, bossRef:null,
     finalSpawned:false, won:false,
     combo:0, comboT:0, comboMax:0,
@@ -1253,28 +1256,7 @@ const UPGRADES=[
   {id:'hunger', kind:'p', name:'Библия', max:3, desc:()=>'+25% опыта', apply:r=>{r.xpMul+=0.25;}},
   {id:'alch', kind:'p', name:'Целебный эликсир', max:2, desc:()=>'сердца лечат на +25 сильнее и выпадают чаще', apply:r=>{r.heartMul+=1;r.heartDrop+=0.004;}},
   {id:'ward', kind:'p', name:'Оберег', max:3, desc:()=>'периодически гасит 1 вражеский снаряд (чаще с уровнями)', apply:r=>{r.wardEvery=Math.max(2.5,r.wardEvery-1.3);}},
-  // --- синергии ---
-  {id:'frost', kind:'syn', name:'Освящённые болты', max:1,
-    desc:()=>'БОЛТЫ освящены: враги замедляются на 35%',
-    req:r=>r.weapons.bolt>=3},
-  {id:'shatter', kind:'syn', name:'Кара света', max:1,
-    desc:()=>'замедленные враги ВЗРЫВАЮТСЯ светом при смерти, раня соседей',
-    req:r=>(r.taken.frost||0)>0},
-  {id:'conduct', kind:'syn', name:'Громовой алтарь', max:1,
-    desc:()=>'ЦЕПНАЯ МОЛНИЯ по врагам в дыму КАДИЛА: +60% урона и +2 перескока',
-    req:r=>r.weapons.chain>=2&&r.weapons.aura>=1},
-  {id:'whirl', kind:'syn', name:'Святой вихрь', max:1,
-    desc:()=>'КЛИНКИ лечат 1 HP за удар и кружат на 35% быстрее',
-    req:r=>r.weapons.orbit>=3&&(r.taken.leech||0)>=1},
-  {id:'bleed', kind:'syn', name:'Печать креста', max:1,
-    desc:()=>'КРЕСТ клеймит врага: раненые истекают кровью 3 секунды',
-    req:r=>r.weapons.scythe>=3&&(r.taken.crit||0)>=2},
-  {id:'wind', kind:'syn', name:'Святой ливень', max:1,
-    desc:()=>'+1 СКЛЯНКА СВЯТОЙ ВОДЫ, лужи огня на 35% шире',
-    req:r=>r.weapons.mortar>=3&&(r.taken.haste||0)>=1},
-  {id:'bastion', kind:'syn', name:'Бастион света', max:1,
-    desc:()=>'КАДИЛО рассеивает снаряды вдвое быстрее, а рассеянные взрываются, раня врагов',
-    req:r=>r.weapons.aura>=3&&(r.taken.armor||0)>=2},
+  // синергии переехали в FUSIONS (слияние двух оружий на lv5) — см. ниже
 ];
 function upgAvail(d){
   if(d.kind==='w'){
@@ -1297,10 +1279,22 @@ const EVOS=[
   {id:'lantern',name:'Маяк',           req:r=>r.weapons.lantern>=5&&(r.taken.might||0)>=3,desc:'ФОНАРЬ вспыхивает МАЯКОМ — жгучий свет на 360° вокруг'},
   {id:'sword', name:'Рой клинков',     req:r=>r.weapons.sword>=5&&(r.taken.haste||0)>=2,  desc:'МЕЧ ВЕРЫ разделяется на РОЙ клинков — больше мечей, шире радиус, сильнее'},
 ];
+// СЛИЯНИЯ ОРУЖИЯ: оба оружия пары на lv5 → выпадает карта-слияние → оба помечаются фиолетовым (или сливаются в одно)
+const FUSIONS=[
+  {id:'storm', name:'Громовой алтарь', pair:['chain','aura'],   mode:'enhance', desc:'ЦЕПЬ + КАДИЛО: молния непрерывно бьёт по всем в дыму — гроза вокруг героя'},
+  {id:'steel', name:'Стальная буря',   pair:['orbit','sword'],  mode:'merge',   desc:'КЛИНКИ + МЕЧ сливаются в ОДИН огромный медленный клинок, сносящий почти всех с удара'},
+  {id:'pyre',  name:'Крестный огонь',  pair:['scythe','mortar'],mode:'enhance', desc:'КРЕСТ + ВОДА: кресты вспыхивают огнём и поджигают всё на своём пути'},
+  {id:'spear', name:'Копьё света',     pair:['bolt','lantern'], mode:'enhance', desc:'АРБАЛЕТ + ФОНАРЬ: луч и болты сливаются в пронзающее копьё света сквозь ряд врагов'},
+  {id:'knell', name:'Святой набат',    pair:['bell','aura'],    mode:'enhance', desc:'КОЛОКОЛ + КАДИЛО: волна святого света — сносит снаряды, бьёт по площади и замедляет'},
+];
+function fusionReq(f){ return run.weapons[f.pair[0]]>=5 && run.weapons[f.pair[1]]>=5; }
+function isFused(wid){ for(const f of FUSIONS){ if(run.fused[f.id]&&(f.pair[0]===wid||f.pair[1]===wid)) return true; } return false; }
 function rollUpgrades(){
   const evos=EVOS.filter(e=>!run.evo[e.id]&&e.req(run)).map(e=>({kind:'evo',id:e.id,name:e.name,desc:()=>e.desc}));
+  const fus=FUSIONS.filter(f=>!run.fused[f.id]&&fusionReq(f)).map(f=>({kind:'fusion',id:f.id,name:f.name,desc:()=>f.desc}));
   const cands=UPGRADES.filter(d=>!run.banished[d.id]&&upgAvail(d));
   const out=[];
+  for(const f of fus){ if(out.length<3) out.push(f); }  // слияния — в приоритете
   for(const e of evos){ if(out.length<3) out.push(e); } // эволюции — в приоритете
   while(out.length<3&&cands.length){
     let total=0;
@@ -1320,6 +1314,13 @@ function applyUpgrade(d){
     showBanner(d.name,'ЭВОЛЮЦИЯ');
     addBurst(run.p.x,run.p.y,'#ffe08a',32,260,0.7,3.2);
     A.lvlup(); flashGold(); hitStopAdd(0.07);
+    return;
+  }
+  if(d.kind==='fusion'){
+    run.fused[d.id]=true;
+    showBanner(d.name,'СЛИЯНИЕ');
+    addBurst(run.p.x,run.p.y,'#c77dff',34,280,0.75,3.4);
+    A.lvlup(); flashGold(); hitStopAdd(0.08);
     return;
   }
   run.taken[d.id]=(run.taken[d.id]||0)+1;
@@ -1347,11 +1348,13 @@ function renderChoices(title){
   run.choices.forEach((d,i)=>{
     const lv=d.kind==='w'?run.weapons[d.id]:(run.taken[d.id]||0);
     const badge=d.kind==='evo'?'<span class="badge evo">★ ЭВОЛЮЦИЯ</span>'
+      :d.kind==='fusion'?'<span class="badge fuse">⮂ СЛИЯНИЕ</span>'
       :d.kind==='w'?(lv===0?'<span class="badge new">НОВОЕ ОРУЖИЕ</span>':`<span class="badge">УР. ${lv} → ${lv+1}</span>`)
       :d.kind==='syn'?'<span class="badge syn">СИНЕРГИЯ</span>'
       :`<span class="badge">УР. ${lv} → ${lv+1}</span>`;
-    const el=document.createElement('div'); el.className='card'+(d.kind==='evo'?' evocard':'')+(run.banishMode?' banish':'');
-    el.innerHTML=`<img class="cardico" src="${icoURL(d.kind==='syn'?'syn':d.id)}">${badge}<div class="ckey">${i+1}</div><div class="cname">${d.name}</div><div class="cdesc">${d.desc(lv)}</div>`;
+    const icoId=d.kind==='fusion'?((FUSIONS.find(f=>f.id===d.id)||{pair:['syn']}).pair[0]):(d.kind==='syn'?'syn':d.id);
+    const el=document.createElement('div'); el.className='card'+(d.kind==='evo'?' evocard':'')+(d.kind==='fusion'?' fusioncard':'')+(run.banishMode?' banish':'');
+    el.innerHTML=`<img class="cardico" src="${icoURL(icoId)}">${badge}<div class="ckey">${i+1}</div><div class="cname">${d.name}</div><div class="cdesc">${d.desc(lv)}</div>`;
     el.onclick=()=>cardClick(i);
     c.appendChild(el);
   });
@@ -1415,7 +1418,7 @@ function refreshItems(){
     const d=owned[i];
     const chip=document.createElement('div');
     if(d){
-      chip.className='ichip w'+(run.evo[d.id]?' evo':'');
+      chip.className='ichip w'+(run.evo[d.id]?' evo':'')+(isFused(d.id)?' fused':'');
       chip.title=d.name;
       chip.innerHTML='<img src="'+icoURL(d.id)+'"><span>'+run.weapons[d.id]+'</span>';
     } else {
@@ -1480,6 +1483,7 @@ function damageEnemy(e,dmg,src,kx,ky){
   dmg=Math.max(1,Math.round(dmg*rand(0.92,1.08)));
   e.hp-=dmg; e.flash=0.09;
   run.stats.dmg[src]=(run.stats.dmg[src]||0)+dmg;
+  if(run.fused.pyre&&src==='scythe'){ e.burnT=Math.max(e.burnT||0,2.2); e.burnD=Math.max(e.burnD||0,dmg*0.35); } // Крестный огонь: кресты поджигают
   if(run.p.leech>0) run.leechPool+=dmg*0.02*run.p.leech;
   if(kx&&!e.boss&&!e.elite&&e.type!=='brute'){e.kx+=kx;e.ky+=ky;}
   if(meta.settings.dmgnum&&(src!=='aura'||chance(0.3))) addText(e.x+rand(-8,8),e.y-e.r-6,dmg,crit?'#ffb938':'#fff',crit?22:15);
@@ -1763,7 +1767,7 @@ function fireWeapons(dt){
     }
   }
   // --- костяные клинки: орбитальные ---
-  if(wl.orbit>0){
+  if(wl.orbit>0&&!run.fused.steel){
     const lv=wl.orbit, evo=run.evo.orbit;
     const n=(1+lv)+(evo?2:0), rad=(66+8*lv)+(evo?22:0);
     const spin=(2.2+0.15*lv)*(run.taken.whirl?1.35:1)*(evo?1.4:1)/p.cdMul;
@@ -1852,24 +1856,25 @@ function fireWeapons(dt){
   if(wl.bell>0){
     wt.bell-=dt;
     if(wt.bell<=0){
-      const lv=wl.bell, evo=run.evo.bell;
-      const maxR=(120+22*lv)*(evo?1.5:1), dmg=(12+6*lv)*p.dmgMul*(evo?1.4:1);
-      run.rings.push({x:p.x,y:p.y,r:18,maxR,dmg,hit:{}});
+      const lv=wl.bell, evo=run.evo.bell, knell=run.fused.knell; // Святой набат: больше волна + замедление
+      const maxR=(120+22*lv)*(evo?1.5:1)*(knell?1.5:1), dmg=(12+6*lv)*p.dmgMul*(evo?1.4:1)*(knell?1.4:1);
+      run.rings.push({x:p.x,y:p.y,r:18,maxR,dmg,hit:{},knell});
       A.nova();
-      wt.bell=Math.max(1.1,2.4-0.13*lv)*p.cdMul*(evo?0.65:1);
+      wt.bell=Math.max(1.1,2.4-0.13*lv)*p.cdMul*(evo?0.65:1)*(knell?0.6:1);
     }
   }
   // --- фонарь: луч в сторону ближайшего врага ---
   if(wl.lantern>0){
     const lv=wl.lantern, evo=run.evo.lantern;
-    let tgt=null,bd=1e9; const range=(150+22*lv)*(evo?1.4:1);
+    const spear=run.fused.spear; // Копьё света: фонарь+арбалет = мощный пронзающий луч
+    let tgt=null,bd=1e9; const range=(150+22*lv)*(evo?1.4:1)*(spear?1.6:1);
     for(const e of run.en){ if(e.dead) continue; const d=dist2(p.x,p.y,e.x,e.y); if(d<bd){bd=d;tgt=e;} }
     if(tgt&&bd<range*range){
       run.lanternAim=Math.atan2(tgt.y-p.y,tgt.x-p.x);
       wt.lantern-=dt;
       if(wt.lantern<=0){
-        wt.lantern=0.22;
-        const half=(evo?Math.PI:0.18+0.08*lv), dmg=(2+1.1*lv)*p.dmgMul*(evo?1.3:1); // урон фонаря ×0.5
+        wt.lantern=spear?0.1:0.22;
+        const half=(evo?Math.PI:0.18+0.08*lv), dmg=(2+1.1*lv)*p.dmgMul*(evo?1.3:1)*(spear?2.4:1); // урон фонаря ×0.5
         forNear(p.x,p.y,range+46,e=>{
           if(e.dead) return;
           const d2=dist2(p.x,p.y,e.x,e.y); if(d2>range*range) return;
@@ -1879,8 +1884,19 @@ function fireWeapons(dt){
       }
     } else run.lanternAim=run.lanternAim;
   }
+  // --- Стальная буря (Клинки+Меч): один огромный медленный клинок, сносящий почти всех ---
+  if(run.fused.steel){
+    const R=132, hitR=56, dmg=(150+34*Math.max(wl.orbit,wl.sword))*p.dmgMul;
+    if(!run.swords.length) run.swords.push({x:p.x,y:p.y,oang:0,ang:0});
+    while(run.swords.length>1) run.swords.pop();
+    const sw=run.swords[0];
+    sw.oang=(sw.oang||0)+1.5*dt;
+    sw.x=p.x+Math.cos(sw.oang)*R; sw.y=p.y+Math.sin(sw.oang)*R; sw.ang=sw.oang; sw.big=true; // рукоять к герою, лезвие наружу
+    forNear(sw.x,sw.y,hitR+46,e=>{ if(e.dead||e.swT>0) return; if(dist2(sw.x,sw.y,e.x,e.y)<(hitR+e.r)*(hitR+e.r)){ const ka=Math.atan2(e.y-p.y,e.x-p.x); damageEnemy(e,dmg,'sword',Math.cos(ka)*200,Math.sin(ka)*200); e.swT=0.3; } });
+    run.bladePts.push({x:sw.x,y:sw.y,r:hitR});
+  }
   // --- Меч веры: авто-сик в радиусе вокруг героя (сам выбирает ближайшую цель) ---
-  if(wl.sword>0){
+  if(wl.sword>0&&!run.fused.steel){
     const lv=wl.sword, evo=run.evo.sword;
     const cnt=1+(lv>=3?1:0)+(evo?2:0);            // 1 → 2 на lv3 → +2 эво
     const R=150+18*lv, spd=340+28*lv;             // радиус действия и скорость
@@ -1923,14 +1939,14 @@ function fireChain(lv){
   const bRef=run.bossRef;
   if(bRef&&!bRef.dead&&dist2(p.x,p.y,bRef.x,bRef.y)<430*430) cur=bRef;
   const evo=run.evo.chain;
-  const jumps=2+lv+(run.taken.conduct?2:0)+(evo?3:0);
+  const jumps=2+lv+(run.fused.storm?3:0)+(evo?3:0);
   let dmg=(14+7*lv)*p.dmgMul*(evo?1.2:1);
   const seen=new Set(), pts=[{x:p.x,y:p.y}];
   for(let i=0;i<jumps&&cur;i++){
     seen.add(cur.id);
     pts.push({x:cur.x,y:cur.y});
     let mult=1;
-    if(run.taken.conduct&&run.auraR>0&&dist2(cur.x,cur.y,p.x,p.y)<(run.auraR+cur.r)*(run.auraR+cur.r)) mult=1.6;
+    if(run.fused.storm&&run.auraR>0&&dist2(cur.x,cur.y,p.x,p.y)<(run.auraR+cur.r)*(run.auraR+cur.r)) mult=2.0;
     damageEnemy(cur,dmg*mult,'chain');
     if(evo){ // Гнев небес: удар по площади в точке попадания
       const sd=dmg*0.6, cx=cur.x, cy=cur.y;
@@ -1949,7 +1965,7 @@ function fireChain(lv){
   }
   run.fx.push({pts,t:0.14,max:0.14});
   A.chain();
-  run.wt.chain=Math.max(0.55,1.9-0.12*lv)*p.cdMul;
+  run.wt.chain=Math.max(0.55,1.9-0.12*lv)*p.cdMul*(run.fused.storm?0.4:1); // гроза: бьёт намного чаще
 }
 
 // ============================== ENEMY BEHAVIOUR ==============================
@@ -2499,7 +2515,7 @@ function updateZones(dt){
     forNear(ring.x,ring.y,ring.r+30,e=>{
       if(e.dead||ring.hit[e.id]) return;
       const d=Math.sqrt(dist2(ring.x,ring.y,e.x,e.y));
-      if(d>=ring.r-20&&d<=ring.r+e.r){ ring.hit[e.id]=1; damageEnemy(e,ring.dmg,'bell'); }
+      if(d>=ring.r-20&&d<=ring.r+e.r){ ring.hit[e.id]=1; damageEnemy(e,ring.dmg,'bell'); if(ring.knell) applySlow(e,0.55,1.4); }
     });
     if(ring.r>=ring.maxR) ring.dead=true;
   }
@@ -2935,10 +2951,11 @@ function drawBlades(){
   }
 }
 function drawSwords(){
-  if(run.weapons.sword<=0||!run.swords.length) return;
+  if(!run.swords.length) return;
   const spr=SPR.sword;
   for(const sw of run.swords){
     ctx.save(); ctx.translate(sw.x,sw.y); ctx.rotate(sw.ang||0);
+    if(sw.big) ctx.scale(3.3,2.1); // длиннее (по лезвию) и тоньше
     ctx.drawImage(spr,-spr.width/2,-spr.height/2);
     ctx.restore();
   }
