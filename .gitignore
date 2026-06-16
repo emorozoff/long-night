@@ -1,0 +1,6 @@
+# OS
+.DS_Store
+
+# Тестовые артефакты (headless QA)
+.playwright-mcp/
+qa*.jpeg
