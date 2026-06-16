@@ -1,9 +1,9 @@
 // Long Night — service worker. Документ грузим network-first (свежая игра),
 // ассеты (музыка/иконки) cache-first (быстро + офлайн).
 // ВАЖНО: при каждом деплое менять номер версии кэша, иначе старые ассеты залипнут.
-const CACHE = 'longnight-0.30';
+const CACHE = 'longnight-0.33';
 const ASSETS = [
-  './', './index.html', './manifest.webmanifest',
+  './', './index.html', './manifest.webmanifest', './fonts/VT323-Regular.ttf',
   './icons/icon-192.png', './icons/icon-512.png', './icons/icon-180.png',
   './music/menu.mp3', './music/calm.ogg', './music/intense.mp3', './music/boss.mp3',
   './music/tension.mp3', './music/final.mp3'

@@ -13,8 +13,9 @@
 <meta name="apple-mobile-web-app-title" content="Long Night">
 <link rel="apple-touch-icon" href="icons/icon-180.png">
 <style>
+@font-face{font-family:'VT323';src:url('fonts/VT323-Regular.ttf') format('truetype');font-display:swap;}
 :root{
-  --red:#d4203a; --red2:#8c1426; --gold:#e7b54a; --purple:#b46ee0;
+  --red:#d4203a; --red2:#8c1426; --gold:#e7b54a; --purple:#b46ee0; --pix:'VT323','Courier New',monospace;
   --bg:#0a0810; --panel:#16101a; --line:#5a2030; --txt:#d8cfd6; --dim:#8a7f8a;
 }
 *{box-sizing:border-box; margin:0; padding:0;}
@@ -67,13 +68,14 @@ h1,h2,.serif{font-family:Georgia,'Times New Roman',serif;}
   -webkit-backdrop-filter:blur(2px);backdrop-filter:blur(2px);}
 .screen.lite{background:radial-gradient(ellipse at center, rgba(9,9,12,.48), rgba(5,5,7,.8));}
 .hidden{display:none !important;}
+#scrMenu{background:none;-webkit-backdrop-filter:none;backdrop-filter:none;}
 .divline{width:240px;max-width:60vw;height:1px;border:0;margin:2px 0 2px;
   background:linear-gradient(90deg,transparent,#6a3038,transparent);}
 .titlewrap{position:relative;display:inline-block;}
-.title{font-size:min(72px,10vw);letter-spacing:10px;color:#c01524;margin:0;
-  text-shadow:0 0 26px rgba(150,12,22,0.55),0 3px 0 #2a0810,0 5px 14px #000;animation:titlepulse 3.6s ease-in-out infinite;}
-@keyframes titlepulse{0%,100%{text-shadow:0 0 18px rgba(150,12,22,0.45),0 3px 0 #2a0810,0 5px 14px #000}
-  50%{text-shadow:0 0 40px rgba(186,24,38,0.72),0 3px 0 #2a0810,0 5px 14px #000}}
+.title{font-family:var(--pix);font-size:min(104px,15vw);letter-spacing:4px;color:#c01524;margin:0;line-height:1;
+  text-shadow:0 0 12px rgba(150,12,22,0.38),0 3px 0 #2a0810,0 5px 14px #000;animation:titlepulse 3.6s ease-in-out infinite;}
+@keyframes titlepulse{0%,100%{text-shadow:0 0 10px rgba(150,12,22,0.34),0 3px 0 #2a0810,0 5px 14px #000}
+  50%{text-shadow:0 0 22px rgba(186,24,38,0.5),0 3px 0 #2a0810,0 5px 14px #000}}
 .drip{position:absolute;top:82%;width:5px;height:0;background:#9e0f1c;border-radius:2px;
   box-shadow:0 0 7px rgba(150,12,22,0.55);opacity:0;animation:drip 5s ease-in infinite;}
 .drip::after{content:'';position:absolute;left:-1.5px;bottom:-4px;width:8px;height:8px;border-radius:50%;
@@ -83,17 +85,19 @@ h1,h2,.serif{font-family:Georgia,'Times New Roman',serif;}
 .drip.d2{left:39%;animation-duration:6.8s;animation-delay:2.1s}
 .drip.d3{left:62%;animation-duration:6.1s;animation-delay:3.4s}
 .drip.d4{left:85%;animation-duration:7.4s;animation-delay:1.2s}
-.subtitle{color:var(--dim);letter-spacing:5px;font-size:14px;margin-top:-8px;}
-.btn{pointer-events:auto;cursor:pointer;border:1px solid #7a2433;border-radius:8px;color:#f0dde0;
-  background:linear-gradient(180deg,#3a1520,#220d14);padding:12px 30px;font-size:16px;letter-spacing:2px;
-  font-family:Georgia,serif;transition:.13s;}
+.subtitle{font-family:var(--pix);color:var(--dim);letter-spacing:3px;font-size:20px;margin-top:-2px;}
+.btn{pointer-events:auto;cursor:pointer;border:2px solid #7a2433;border-radius:4px;color:#f0dde0;
+  background:linear-gradient(180deg,#3a1520,#220d14);padding:11px 26px;font-size:22px;letter-spacing:1px;
+  font-family:var(--pix);transition:.13s;}
 .btn:hover{border-color:var(--red);background:linear-gradient(180deg,#561c2c,#2c1019);box-shadow:0 0 18px #d4203a44;transform:translateY(-2px);}
 .btn:active{transform:translateY(0);box-shadow:0 0 10px #d4203a55 inset;}
-.btn.big{font-size:23px;padding:15px 56px;border-width:2px;border-radius:10px;}
+.btn.big{font-size:34px;padding:13px 60px;border:2px solid #ff7a86;border-radius:6px;color:#fff;
+  background:linear-gradient(180deg,#e0263e,#9c1020);box-shadow:0 0 26px rgba(212,32,58,0.45),0 4px 0 #5a0c16;text-shadow:0 2px 0 #5a0c16;}
+.btn.big:hover{background:linear-gradient(180deg,#f23a52,#b01426);box-shadow:0 0 36px rgba(212,32,58,0.6),0 4px 0 #5a0c16;transform:translateY(-2px);}
 .btnrow{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;}
 .btnrow .btn{min-width:150px;text-align:center;}
 .hint{color:var(--dim);font-size:13px;margin-top:10px;}
-.goldrow{color:var(--gold);font-size:20px;letter-spacing:1px;}
+.goldrow{font-family:var(--pix);color:var(--gold);font-size:26px;letter-spacing:1px;border:2px solid #6a5320;border-radius:5px;background:#15110a;padding:2px 16px;text-shadow:0 0 10px rgba(231,181,74,0.4);}
 
 /* ---------- выбор локации ---------- */
 #locRow,#pickLocGrid{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;max-width:760px;}
@@ -267,11 +271,11 @@ h1,h2,.serif{font-family:Georgia,'Times New Roman',serif;}
 
 <div id="scrMenu" class="screen">
   <div class="titlewrap"><h1 class="title">LONG NIGHT</h1><span class="drip d1"></span><span class="drip d2"></span><span class="drip d3"></span><span class="drip d4"></span></div>
-  <div class="subtitle">НОЧЬ НЕ КОНЧИТСЯ НИКОГДА</div>
+  <div class="subtitle">НОЧЬ БУДЕТ ОЧЕНЬ ДОЛГОЙ</div>
   <hr class="divline">
+  <button class="btn big" id="btnStart">▸ НА ОХОТУ</button>
   <div class="goldrow">◆ <span id="menuGold">0</span></div>
   <div id="menuBest" class="hint"></div>
-  <button class="btn big" id="btnStart">В БОЙ</button>
   <div class="btnrow">
     <button class="btn" id="btnHeroes">ГЕРОИ</button>
     <button class="btn" id="btnShop">СКЛЕП</button>
@@ -384,7 +388,7 @@ h1,h2,.serif{font-family:Georgia,'Times New Roman',serif;}
    ===================================================================== */
 
 // ============================== UTILS ==============================
-const VERSION='0.30';
+const VERSION='0.33';
 const TAU = Math.PI*2;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const irand=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
@@ -584,7 +588,7 @@ const A={
 // boss = индекс финального босса локации в BOSSES (план C: общая тройка #0–2 + свой финал #3–7).
 // Темы/названия локаций перерабатываются в Tier 3 под боссов; пока сохраняем текущие.
 const LOCS=[
-  {id:'grave', name:'ПОГОСТ',        desc:'классическая вечная ночь', req:0,   gold:0,    boss:3},
+  {id:'grave', name:'ЗАТОНУВШАЯ ДЕРЕВНЯ', desc:'чёрная стоячая вода по колено · топкие лужи замедляют', req:0, gold:0, boss:3},
   {id:'swamp', name:'КРОВАВАЯ ТОПЬ', desc:'лужи замедляют всех · слизней больше · +15% золота', req:240, gold:0.15, boss:4},
   {id:'ash',   name:'ПЕПЕЛИЩЕ',      desc:'огненные разломы · элита чаще · +25% золота', req:420, gold:0.25, boss:5},
   {id:'crypt', name:'ЗАТОПЛЕННЫЙ СКЛЕП', desc:'ледяная вода замедляет нечисть (не тебя) · +20% золота', req:600, gold:0.20, boss:6},
@@ -815,6 +819,8 @@ function buildSprites(){
     warper:{s:3,pal:{d:'#2a1244',p:'#4a2470',P:'#6e3f9e',e:'#e040ff',w:'#1a0a24',h:'#6e3f8a'},rows:[
       'h.......h','...ppp...','..pPPPp..','.pPPPPPp.','.pPeeePp.',
       '.pPewePp.','.pPPPPPp.','..pPPPp..','..pPPPp..','...ppp...','...p.p...']},
+    gnat:{s:3,pal:{b:'#3a1230',w:'#7c5a8a',e:'#ff4060'},rows:[
+      'w...w','.bbb.','.beb.','.www.']},
   };
   for(const id in ENEMY_MAPS){
     const d=ENEMY_MAPS[id];
@@ -827,6 +833,13 @@ function buildSprites(){
     '..CkkkkkkkC..','..CkekkkekC..','..CkkkkkkkC..','..CkmmmmmkC..','..CktmmmtkC..',
     '..CCkkkkkCC..','..CCCCCCCCC..','.CCCCCCCCCCC.','.CCCCCCCCCCC.','..CC.CCC.CC..'],
     {C:'#3a0e1a',c:'#5a1626',k:'#e8dcc8',e:'#ff2038',m:'#160308',t:'#f0e8d6',H:'#d8cfc4'},7);
+  // Матерь роя — паучиха-матриарх (боссовый спрайт по bkind: SPR.boss_<kind>)
+  SPR.boss_matron=px([
+    'l.l.....l.l','.l.l...l.l.','..bbbBBbb..','..bBeBeBb..','..bBBBBBb..',
+    '.bBBBBBBBb.','bBBBhBBBBBb','bBBBBBBBBBb','.bBBBBBBBb.','..bBBBBBb..',
+    '.l..bbb..l.','l.l.....l.l'],
+    {b:'#3a1230',B:'#7c1f4e',e:'#ff2840',l:'#2a0e22',h:'#a93a6e'},7);
+  SPR.boss_matron_w=whiteOf(SPR.boss_matron);
   // --- иконки предметов (тема Света) ---
   const IPAL={W:'#f2ecdf',s:'#9aa6bd',S:'#5a6478',n:'#c6cedd',g:'#e7c24a',G:'#a87f24',l:'#f6e596',r:'#d4203a',R:'#8c1426',b:'#6a4a2c',B:'#3a2a18',k:'#1c1620',y:'#ffd84a',p:'#7a3aa0',P:'#4a2068',c:'#cfe8ff',a:'#3a78c8',e:'#e8c6a0',m:'#5aa84a'};
   const ico=rows=>px(rows,IPAL,4,'#0b0710');
@@ -968,7 +981,10 @@ function buildSprites(){
     if(extra)extra(g);
   });
   SPR.grounds={
-    grave:SPR.ground,
+    grave:makeGround('#13201d',
+      ()=>`rgba(${irand(30,70)},${irand(85,125)},${irand(95,130)},${rand(0.05,0.14)})`,
+      'rgba(8,22,26,0.5)',
+      g=>{for(let i=0;i<24;i++){g.fillStyle=`rgba(${irand(55,105)},${irand(120,165)},${irand(85,120)},${rand(0.14,0.38)})`;g.beginPath();g.ellipse(irand(6,250),irand(6,250),rand(1.5,4),rand(1,2.4),0,0,TAU);g.fill();}}),
     swamp:makeGround('#152019',
       ()=>`rgba(${irand(35,70)},${irand(70,105)},${irand(55,85)},${rand(0.06,0.16)})`,
       'rgba(6,14,10,0.55)'),
@@ -986,7 +1002,12 @@ function buildSprites(){
   };
   // --- декор биомов ---
   SPR.decors={
-    grave:SPR.decor,
+    grave:[
+      mkCanvas(30,18,g=>{ g.fillStyle='#3a2e26';g.beginPath();g.moveTo(15,2);g.lineTo(28,14);g.lineTo(2,14);g.closePath();g.fill(); g.strokeStyle='#241c16';g.lineWidth=1.5;g.beginPath();g.moveTo(15,2);g.lineTo(15,13);g.stroke(); g.fillStyle='rgba(45,95,85,0.55)';g.fillRect(2,13,26,4); }),
+      mkCanvas(18,20,g=>{ g.strokeStyle='#33524a';g.lineWidth=2;g.beginPath();g.moveTo(5,19);g.quadraticCurveTo(4,8,7,2);g.moveTo(10,19);g.quadraticCurveTo(11,7,9,3);g.moveTo(14,19);g.quadraticCurveTo(16,9,13,4);g.stroke();g.fillStyle='#4a3a2a';g.fillRect(6,1,2.5,6);g.fillRect(12,3,2.5,5); }),
+      mkCanvas(26,14,g=>{ g.strokeStyle='#2e2620';g.lineWidth=4;g.lineCap='round';g.beginPath();g.moveTo(3,10);g.quadraticCurveTo(13,3,23,8);g.stroke(); }),
+      mkCanvas(16,10,g=>{ g.fillStyle='rgba(70,130,90,0.6)';for(let i=0;i<6;i++){g.beginPath();g.ellipse(irand(3,13),irand(3,7),rand(1.5,3),rand(1,2),0,0,TAU);g.fill();} }),
+    ],
     swamp:[
       mkCanvas(18,20,g=>{ // камыш
         g.strokeStyle='#2e4a34';g.lineWidth=2;
@@ -1029,9 +1050,14 @@ function buildSprites(){
   {
     const OBPAL={S:'#7c776f',s:'#5e5952',d:'#3a352f',m:'#2a2622'};
     const ob=rows=>px(rows,OBPAL,5,'#15120f');
+    const WPAL={W:'#6a4e30',w:'#4a3420',d:'#2c1e12',m:'#1a2a26'};
+    const wo=rows=>px(rows,WPAL,5,'#120c08');   // сваи мостков (Затонувшая деревня)
     SPR.obst={ def:[
       ob(['.ssss.','sSSSSs','sSSSSs','sSddSs','sSSSSs','sSSSSs','ssssss','.dmmd.']),
       ob(['..ss..','.sSSs.','sSSSSs','sSSSSs','ssddss','.dmmd.'])
+    ], grave:[
+      wo(['.WW.','.Ww.','.WW.','dWwd','.Ww.','.WW.','.Ww.','dmmd']),
+      wo(['WW.WW','Ww.wW','WW.WW','.WwW.','.dWd.','.mm..'])
     ]};
   }
 }
@@ -1073,9 +1099,10 @@ const ETYPES={
   spitter:{r:13, hp:26,  spd:70,  dmg:7,  xp:3,   behav:'ranged'},
   brute:  {r:24, hp:150, spd:30,  dmg:22, xp:8,   behav:'tank'},
   warper: {r:12, hp:34,  spd:62,  dmg:12, xp:4,   behav:'warp'},
+  gnat:   {r:6,  hp:4,   spd:150, dmg:4,  xp:1,   behav:'swarm'},
   boss:   {r:42, hp:1500,spd:42,  dmg:20, xp:120, behav:'boss'},
 };
-const ENAMES={zombie:'Упыри',bat:'Нетопыри',slime:'Слизни',spitter:'Плевуны',brute:'Громилы',warper:'Бесы',elite:'Элита',boss:'Боссы'};
+const ENAMES={zombie:'Упыри',bat:'Нетопыри',slime:'Слизни',spitter:'Плевуны',brute:'Громилы',warper:'Бесы',gnat:'Мошкара',elite:'Элита',boss:'Боссы'};
 const ENEMY_INFO={
   zombie:{name:'Упырь',desc:'Медлительный мертвец. Прёт напрямую — берёт числом.'},
   bat:{name:'Нетопырь',desc:'Быстрый рой, летит зигзагом. В стае опасен.'},
@@ -1083,6 +1110,7 @@ const ENEMY_INFO={
   spitter:{name:'Плевун',desc:'Держит дистанцию и плюётся кислотой издалека.'},
   brute:{name:'Громила',desc:'Бронированный таран. Иммунен к отбрасыванию, в ярости ускоряется.'},
   warper:{name:'Бес',desc:'Телепортируется к охотнику и бьёт рывком.'},
+  gnat:{name:'Мошкара',desc:'Крошечный летучий рой. По одной — ничто, тучей — беда.'},
   boss:{name:'Боссы',desc:'Носферату и его слуги. Приходят каждые 3 минуты, бьются по фазам.'},
 };
 const WSTAT={bolt:'Арбалет',orbit:'Серебряные клинки',chain:'Цепная молния',aura:'Освящённая земля',scythe:'Метательный крест',mortar:'Святая вода',bell:'Колокол',lantern:'Фонарь',bleed:'Кровотечение',shatter:'Кара света',rift:'Огненные разломы',nova_rev:'Святые мощи',bomb:'Бомба'};
@@ -1864,7 +1892,7 @@ function updateEnemies(dt){
       if(e.dead) continue;
     }
     let sf=e.slowT>0?e.slowF:1;
-    if((run.loc==='swamp'||run.loc==='crypt')&&inPool(e.x,e.y)) sf*=run.loc==='crypt'?0.62:0.8;
+    if((run.loc==='swamp'||run.loc==='crypt'||run.loc==='grave')&&inPool(e.x,e.y)) sf*=run.loc==='crypt'?0.62:0.8;
     const dx=p.x-e.x, dy=p.y-e.y;
     const d=Math.sqrt(dx*dx+dy*dy)||1;
     let mvx=0,mvy=0;
@@ -1970,6 +1998,40 @@ function updateEnemies(dt){
 
 // ============================== BOSS ==============================
 const BOSS_MECH={}; // механики по боссу (ключ = bkind); пусто = generic-логика ниже. Заполняется по мере добавления боссов.
+// === Матерь роя (пилот): кайтит прочь, плодит рой-мошкару (0 опыта), фазы по HP ===
+BOSS_MECH.matron=function(e,dt,dx,dy,d,sf){
+  if(e._mi===undefined){ e._mi=1; e.a2=1.4; }   // первый выводок быстро после появления
+  const f=e.hp/e.maxhp;
+  e.phase=f>0.5?0:f>0.25?1:2;
+  // движение: держит дистанцию, медленно убегает от игрока
+  const want=320, spd=40+e.boss*1.5;
+  let mvx=0,mvy=0;
+  if(d<want){ mvx=-dx/d*spd; mvy=-dy/d*spd; }
+  else if(d>want+170){ mvx=dx/d*spd*0.4; mvy=dy/d*spd*0.4; }
+  else { const s=(e.id&1)?1:-1; mvx=-dy/d*spd*0.35*s; mvy=dx/d*spd*0.35*s; }
+  e.x+=mvx*sf*dt; e.y+=mvy*sf*dt;
+  // выводок: пачка мошкары (0 опыта), гуще на низком HP; мягкий потолок числа
+  let gnats=0; for(const o of run.en) if(o.type==='gnat'&&!o.dead) gnats++;
+  e.a2-=dt;
+  if(e.a2<=0){
+    e.a2=[3.4,2.6,1.9][e.phase];
+    if(gnats<70){
+      const n=[4,6,9][e.phase];
+      for(let i=0;i<n;i++){
+        const a=rand(0,TAU), rr=e.r+rand(6,28);
+        const gg=spawnEnemy('gnat',e.x+Math.cos(a)*rr,e.y+Math.sin(a)*rr,{noScale:true});
+        gg.xp=0; gg.kx=Math.cos(a)*130; gg.ky=Math.sin(a)*130;
+      }
+      addBurst(e.x,e.y,'#7c1f4e',10,120,0.4,2.4); A.warp();
+    }
+  }
+  // вход в фазу 2 (33% HP) — разовый большой выброс
+  if(e.phase===2&&!e.burst2){
+    e.burst2=true;
+    for(let i=0;i<18;i++){ const a=i/18*TAU; const gg=spawnEnemy('gnat',e.x+Math.cos(a)*30,e.y+Math.sin(a)*30,{noScale:true}); gg.xp=0; gg.kx=Math.cos(a)*210; gg.ky=Math.sin(a)*210; }
+    addBurst(e.x,e.y,'#a93a6e',26,200,0.6,3); A.roar(); shakeAdd(8);
+  }
+};
 function bossUpdate(e,dt,dx,dy,d,sf){
   const mech=BOSS_MECH[e.bkind]; if(mech){ mech(e,dt,dx,dy,d,sf); return; }
   const f=e.hp/e.maxhp, tier=e.boss;
@@ -2182,7 +2244,7 @@ function updatePlayer(dt){
     if(d>0.18){dx=touchPad.vx/d;dy=touchPad.vy/d;}
   }
   if(dx) p.face=dx>0?1:-1;
-  const spd=230*p.spdMul*(run.loc==='swamp'&&inPool(p.x,p.y)?0.84:1);
+  const spd=230*p.spdMul*((run.loc==='swamp'||run.loc==='grave')&&inPool(p.x,p.y)?0.84:1);
   p.x+=dx*spd*dt; p.y+=dy*spd*dt;
   // коллизия с препятствиями — тормозят ТОЛЬКО игрока (враги/снаряды проходят сквозь)
   forObstaclesNear(p.x,p.y,p.r+OBST_R+6,o=>{
@@ -2400,10 +2462,10 @@ function updateZones(dt){
       run.parts.push({x:p.x+rand(-W/2,W/2),y:p.y+rand(-H/2,H/2),vx:rand(-6,6),vy:-rand(14,34),life:rand(0.8,1.6),max:1.6,color:'#ff8a3a',size:rand(1,2.2)});
   }
   // пузыри в лужах Топи / Склепа
-  if((run.loc==='swamp'||run.loc==='crypt')&&chance(0.2)&&run.parts.length<560){
+  if((run.loc==='swamp'||run.loc==='crypt'||run.loc==='grave')&&chance(0.2)&&run.parts.length<560){
     const cx=Math.floor(p.x/300)+irand(-1,1), cy=Math.floor(p.y/300)+irand(-1,1);
     const pl=poolAt(cx,cy);
-    if(pl) run.parts.push({x:pl.x+rand(-pl.r,pl.r)*0.6,y:pl.y+rand(-pl.r,pl.r)*0.5,vx:0,vy:-rand(4,12),life:rand(0.4,0.9),max:0.9,color:'#8a2030',size:rand(1.5,3)});
+    if(pl) run.parts.push({x:pl.x+rand(-pl.r,pl.r)*0.6,y:pl.y+rand(-pl.r,pl.r)*0.5,vx:0,vy:-rand(4,12),life:rand(0.4,0.9),max:0.9,color:(run.loc==='grave'?'#3f7a68':run.loc==='crypt'?'#3a6a9a':'#8a2030'),size:rand(1.5,3)});
   }
   sweep(run.pots); sweep(run.pools); sweep(run.rifts); sweep(run.rings);
 }
@@ -2465,17 +2527,24 @@ function drawGround(px,py){
     for(let x=x0;x<px+W/2+ts;x+=ts)
       ctx.drawImage(tile,x,y);
   // лужи: кровавые (Топь) / ледяные (Склеп)
-  if(loc==='swamp'||loc==='crypt'){
-    const fill=loc==='crypt'?'rgba(40,90,150,0.34)':'rgba(120,20,38,0.34)';
-    const strk=loc==='crypt'?'rgba(90,160,220,0.30)':'rgba(190,40,60,0.28)';
+  // вода: кривые, детальные пятна (НЕ ровные круги — чтобы не читались как интерактив)
+  if(loc==='swamp'||loc==='crypt'||loc==='grave'){
+    const c1=loc==='crypt'?'rgba(38,86,140,0.32)':loc==='grave'?'rgba(26,72,66,0.34)':'rgba(110,22,36,0.32)';
+    const c2=loc==='crypt'?'rgba(20,52,92,0.42)':loc==='grave'?'rgba(14,46,44,0.44)':'rgba(70,14,24,0.42)';
     const cs=300;
     for(let cy=Math.floor((py-H/2)/cs)-1;cy<=Math.floor((py+H/2)/cs)+1;cy++)
       for(let cx=Math.floor((px-W/2)/cs)-1;cx<=Math.floor((px+W/2)/cs)+1;cx++){
         const pl=poolAt(cx,cy); if(!pl) continue;
-        ctx.fillStyle=fill;
-        ctx.beginPath();ctx.ellipse(pl.x,pl.y,pl.r,pl.r*0.74,0,0,TAU);ctx.fill();
-        ctx.strokeStyle=strk;ctx.lineWidth=1.5;
-        ctx.beginPath();ctx.ellipse(pl.x,pl.y,pl.r,pl.r*0.74,0,0,TAU);ctx.stroke();
+        const sd=hash2(Math.round(pl.x),Math.round(pl.y));
+        const blob=(rm,oy)=>{ ctx.beginPath();
+          for(let i=0;i<=20;i++){ const a=i/20*TAU;
+            const w=1+0.24*Math.sin(a*3+sd*40)+0.14*Math.sin(a*5-sd*25)+0.08*Math.sin(a*8+sd*13);
+            const rr=pl.r*rm*w; ctx.lineTo(pl.x+Math.cos(a)*rr, pl.y+Math.sin(a)*rr*0.72+oy);
+          } ctx.closePath(); };
+        blob(1,0); ctx.fillStyle=c1; ctx.fill();
+        blob(0.58,pl.r*0.06); ctx.fillStyle=c2; ctx.fill();
+        ctx.fillStyle='rgba(220,235,255,0.05)';
+        for(let k=0;k<3;k++){ const a=sd*TAU+k*2.2; ctx.beginPath(); ctx.ellipse(pl.x+Math.cos(a)*pl.r*0.42, pl.y+Math.sin(a)*pl.r*0.26, pl.r*0.16, pl.r*0.045, a,0,TAU); ctx.fill(); }
       }
   }
   const ds=224;
@@ -2603,6 +2672,56 @@ function drawEnemies(px,py){
   }
   if(bosses) for(const e of bosses) drawEnemy(e);
 }
+const BOSS_DRAW={}; // анимированная отрисовка боссов по bkind (пусто = generic спрайт)
+// Матерь роя — детальная паучиха: членистые перебирающие ноги, объёмное тело (градиенты), светящиеся глаза
+BOSS_DRAW.matron=function(e,flashing){
+  const R=e.r*1.4, t=e.t;
+  const breathe=1+Math.sin(t*2.4)*0.025;
+  ctx.save();
+  ctx.translate(e.x,e.y);
+  // ноги: 8 (по 4 с каждой стороны), 2 сегмента, перебирают (sine-шаг с фазой)
+  ctx.lineCap='round'; ctx.lineJoin='round';
+  for(const s of [-1,1]){
+    for(let i=0;i<4;i++){
+      const hx=s*R*0.24, hy=(0.05+i*0.16)*R;          // бедро на головогруди
+      const th=0.7 - i*0.5;                            // веер: перед вниз → зад вверх
+      const lift=Math.max(0,Math.sin(t*7 + i*1.5 + (s<0?2.1:0)))*R*0.16;  // перебор
+      const fx=hx + s*Math.cos(th)*R, fy=hy + Math.sin(th)*R - lift*0.5;  // стопа
+      const mx=(hx+fx)/2 + s*R*0.08, my=(hy+fy)/2 - R*0.46 - lift;        // колено-апекс (вверх)
+      ctx.strokeStyle='#22101f'; ctx.lineWidth=R*0.13;
+      ctx.beginPath(); ctx.moveTo(hx,hy); ctx.quadraticCurveTo(mx,my,fx,fy); ctx.stroke();
+      ctx.strokeStyle='#4a1c42'; ctx.lineWidth=R*0.06;
+      ctx.beginPath(); ctx.moveTo(hx,hy); ctx.quadraticCurveTo(mx,my,fx,fy); ctx.stroke();
+      ctx.fillStyle='#1a0814'; ctx.beginPath(); ctx.arc(fx,fy,R*0.05,0,TAU); ctx.fill();
+    }
+  }
+  // брюшко (объёмное, дыхание)
+  ctx.save(); ctx.scale(1,breathe);
+  const ab=ctx.createRadialGradient(-R*0.2,-R*0.55,R*0.08, 0,-R*0.2,R*1.0);
+  ab.addColorStop(0,'#b94d7a'); ab.addColorStop(0.55,'#7c1f4e'); ab.addColorStop(1,'#341028');
+  ctx.fillStyle=ab; ctx.beginPath(); ctx.ellipse(0,-R*0.2,R*0.82,R*0.92,0,0,TAU); ctx.fill();
+  ctx.fillStyle='rgba(34,8,26,0.5)'; ctx.beginPath(); ctx.ellipse(0,-R*0.25,R*0.24,R*0.5,0,0,TAU); ctx.fill();
+  ctx.fillStyle='rgba(225,160,190,0.22)'; ctx.beginPath(); ctx.ellipse(-R*0.24,-R*0.5,R*0.26,R*0.3,0,0,TAU); ctx.fill();
+  ctx.restore();
+  // головогрудь
+  const cg=ctx.createRadialGradient(-R*0.12,R*0.4,R*0.05, 0,R*0.5,R*0.55);
+  cg.addColorStop(0,'#822f5c'); cg.addColorStop(1,'#280e22');
+  ctx.fillStyle=cg; ctx.beginPath(); ctx.ellipse(0,R*0.45,R*0.5,R*0.46,0,0,TAU); ctx.fill();
+  // хелицеры (челюсти шевелятся)
+  const ch=Math.abs(Math.sin(t*7))*R*0.06;
+  ctx.strokeStyle='#180712'; ctx.lineWidth=R*0.09;
+  ctx.beginPath(); ctx.moveTo(-R*0.15,R*0.8); ctx.lineTo(-R*0.18-ch,R*1.0); ctx.moveTo(R*0.15,R*0.8); ctx.lineTo(R*0.18+ch,R*1.0); ctx.stroke();
+  // глаза (светятся)
+  const eg=(0.55+Math.sin(t*3.2)*0.35).toFixed(2);
+  ctx.fillStyle='rgba(255,42,64,'+eg+')';
+  for(const ey of [[-0.2,0.32],[-0.07,0.28],[0.07,0.28],[0.2,0.32],[-0.12,0.45],[0.12,0.45]]){
+    ctx.beginPath(); ctx.arc(ey[0]*R, R*0.4+ey[1]*R*0.4, R*0.05,0,TAU); ctx.fill();
+  }
+  if(flashing){ ctx.globalAlpha=clamp(e.flash*4,0,0.5); ctx.fillStyle='#fff';
+    ctx.beginPath(); ctx.ellipse(0,-R*0.2,R*0.82,R*0.92,0,0,TAU); ctx.fill();
+    ctx.beginPath(); ctx.ellipse(0,R*0.45,R*0.5,R*0.46,0,0,TAU); ctx.fill(); ctx.globalAlpha=1; }
+  ctx.restore();
+};
 function drawEnemy(e){
   const p=run.p;
   {
@@ -2624,8 +2743,9 @@ function drawEnemy(e){
     }
     const flashing=e.flash>0;
     const alt=SPR[e.type+'_a']&&((Math.floor(e.t*7)+e.id)&1); // 2 кадра ходьбы, фаза по id
-    let spr;
-    if(flashing&&!e.boss) spr=(alt&&SPR[e.type+'_wa'])?SPR[e.type+'_wa']:SPR[e.type+'_w'];
+    let spr, bossW=null;
+    if(e.boss){ spr=SPR['boss_'+e.bkind]||SPR.boss; bossW=SPR['boss_'+e.bkind+'_w']||SPR.boss_w; }
+    else if(flashing) spr=(alt&&SPR[e.type+'_wa'])?SPR[e.type+'_wa']:SPR[e.type+'_w'];
     else spr=alt?SPR[e.type+'_a']:SPR[e.type];
     const base=ETYPES[e.type].r;
     const sc=e.r/base*(e.boss?1.25:1);
@@ -2639,12 +2759,16 @@ function drawEnemy(e){
       ctx.lineWidth=2.5;
       ctx.beginPath();ctx.arc(e.x,e.y,e.r+7,0,TAU);ctx.stroke();
     }
-    ctx.save();
-    ctx.translate(e.x,e.y);
-    ctx.scale(face*sc/squash,sc*squash);
-    ctx.drawImage(spr,-spr.width/2,-spr.height/2);
-    if(flashing&&e.boss&&SPR[e.type+'_w']){ ctx.globalAlpha=clamp(e.flash*5,0,0.55); ctx.drawImage(SPR[e.type+'_w'],-spr.width/2,-spr.height/2); ctx.globalAlpha=1; }
-    ctx.restore();
+    if(e.boss&&BOSS_DRAW[e.bkind]){
+      BOSS_DRAW[e.bkind](e,flashing);
+    } else {
+      ctx.save();
+      ctx.translate(e.x,e.y);
+      ctx.scale(face*sc/squash,sc*squash);
+      ctx.drawImage(spr,-spr.width/2,-spr.height/2);
+      if(flashing&&e.boss&&bossW){ ctx.globalAlpha=clamp(e.flash*5,0,0.55); ctx.drawImage(bossW,-spr.width/2,-spr.height/2); ctx.globalAlpha=1; }
+      ctx.restore();
+    }
     if(e.slowT>0){
       ctx.fillStyle='rgba(110,190,255,0.22)';
       ctx.beginPath();ctx.arc(e.x,e.y,e.r,0,TAU);ctx.fill();
@@ -2775,7 +2899,7 @@ function render(){
   const sx=(Math.random()*2-1)*shk, sy=(Math.random()*2-1)*shk;
   ctx.save();
   ctx.translate(Math.round(W/2-px+sx),Math.round(H/2-py+sy)); // целые пиксели — нет швов между тайлами
-  drawGround(px,py);
+  if(run) drawGround(px,py);
   if(run){
     drawDecals(px,py);
     drawZones();
@@ -2836,43 +2960,63 @@ function render(){
     let s2=0,n2=0; for(const v of fpsBuf){if(v>0){s2+=v;n2++;}}
     const f=n2&&s2>0?Math.round(n2/s2):0;
     ctx.font='12px monospace'; ctx.textAlign='left';
-    ctx.fillStyle='rgba(0,0,0,0.5)'; ctx.fillRect(W-62,4,58,18);
+    ctx.fillStyle='rgba(0,0,0,0.5)'; ctx.fillRect(W-66,H-72,60,18);
     ctx.fillStyle=f>=50?'#7ce86a':f>=30?'#e7b54a':'#e03048';
-    ctx.fillText(f+' fps',W-56,17);
+    ctx.fillText(f+' fps',W-60,H-59);
   }
 }
-// фоновая жизнь главного меню: кровавая луна и нетопыри
-let menuBats=null;
+// фоновая жизнь меню: ночное небо (луна/звёзды/облака/дымка/нетопыри) — без красного, без земли
+let menuBats=null, menuStars=null, menuClouds=null;
 function drawMenuAmbient(){
-  const now=performance.now();
-  const mx=W*0.76, my=H*0.24, mr=Math.min(W,H)*0.13;
-  // холодная луна — заметная, но не кровавая (контраст фона и UI сохранён)
-  const gr=ctx.createRadialGradient(mx,my,mr*0.3,mx,my,mr*2.6);
-  gr.addColorStop(0,'rgba(176,182,205,0.22)');gr.addColorStop(0.5,'rgba(150,158,182,0.07)');gr.addColorStop(1,'rgba(150,158,182,0)');
-  ctx.fillStyle=gr;ctx.fillRect(mx-mr*2.6,my-mr*2.6,mr*5.2,mr*5.2);
-  ctx.fillStyle='#4a4a56';
-  ctx.beginPath();ctx.arc(mx,my,mr,0,TAU);ctx.fill();
-  ctx.fillStyle='#5c5c6a';
-  ctx.beginPath();ctx.arc(mx-mr*0.2,my-mr*0.18,mr*0.8,0,TAU);ctx.fill();
-  ctx.fillStyle='#6a6a78';
-  ctx.beginPath();ctx.arc(mx-mr*0.34,my-mr*0.3,mr*0.5,0,TAU);ctx.fill();
-  ctx.fillStyle='#3c3c46';
-  ctx.beginPath();ctx.arc(mx+mr*0.32,my+mr*0.26,mr*0.17,0,TAU);
-  ctx.arc(mx-mr*0.3,my+mr*0.42,mr*0.11,0,TAU);
-  ctx.arc(mx+mr*0.1,my-mr*0.36,mr*0.08,0,TAU);ctx.fill();
-  if(!menuBats){
-    menuBats=[];
-    for(let i=0;i<12;i++) menuBats.push({x:Math.random()*W,y:Math.random()*H*0.7,v:rand(18,55),ph:rand(0,TAU),sc:rand(0.5,1.1)});
+  const tt=performance.now()*0.001;
+  // небо — тёмный градиент без красного
+  const sky=ctx.createLinearGradient(0,0,0,H);
+  sky.addColorStop(0,'#070912'); sky.addColorStop(0.55,'#0b0e1a'); sky.addColorStop(1,'#10131e');
+  ctx.fillStyle=sky; ctx.fillRect(0,0,W,H);
+  // звёзды — слои + мерцание
+  if(!menuStars){ menuStars=[]; for(let i=0;i<150;i++) menuStars.push({x:Math.random(),y:Math.random()*0.84,r:rand(0.5,1.7),tw:rand(0,TAU),sp:rand(0.6,2.2),dep:rand(0.25,1)}); }
+  for(const s of menuStars){
+    const a=Math.max(0,(0.35+0.5*Math.sin(tt*s.sp+s.tw))*s.dep);
+    ctx.fillStyle='rgba(205,214,238,'+a.toFixed(3)+')';
+    ctx.fillRect(s.x*W, s.y*H, s.r, s.r);
   }
+  const mx=W*0.83, my=H*0.19, mr=Math.min(W,H)*0.115;
+  // холодное сияние вокруг луны
+  const gl=ctx.createRadialGradient(mx,my,mr*0.4,mx,my,mr*3.2);
+  gl.addColorStop(0,'rgba(150,168,205,0.20)'); gl.addColorStop(0.45,'rgba(120,140,180,0.06)'); gl.addColorStop(1,'rgba(120,140,180,0)');
+  ctx.fillStyle=gl; ctx.fillRect(mx-mr*3.2,my-mr*3.2,mr*6.4,mr*6.4);
+  // луна — холодный бледный диск с кратерами
+  ctx.fillStyle='#c9cdd8'; ctx.beginPath(); ctx.arc(mx,my,mr,0,TAU); ctx.fill();
+  ctx.fillStyle='#d9dce5'; ctx.beginPath(); ctx.arc(mx-mr*0.18,my-mr*0.16,mr*0.82,0,TAU); ctx.fill();
+  ctx.fillStyle='#b4b8c5';
+  ctx.beginPath();
+  ctx.arc(mx+mr*0.34,my+mr*0.28,mr*0.16,0,TAU);
+  ctx.arc(mx-mr*0.3,my+mr*0.4,mr*0.1,0,TAU);
+  ctx.arc(mx+mr*0.12,my-mr*0.34,mr*0.075,0,TAU);
+  ctx.arc(mx-mr*0.36,my-mr*0.04,mr*0.06,0,TAU);
+  ctx.fill();
+  // облака — дрейф, мягкие тёмные клочья
+  if(!menuClouds){ menuClouds=[]; for(let i=0;i<6;i++) menuClouds.push({x:Math.random()*W, y:H*(0.08+Math.random()*0.44), w:rand(220,460), h:rand(30,66), v:rand(4,12), a:rand(0.12,0.24)}); }
+  for(const c of menuClouds){
+    c.x-=c.v*0.016; if(c.x<-c.w) c.x=W+c.w;
+    ctx.fillStyle='rgba(38,46,68,'+c.a.toFixed(3)+')';
+    for(let k=0;k<5;k++){ ctx.beginPath(); ctx.ellipse(c.x+k*c.w*0.2, c.y+Math.sin(k*1.7+c.x*0.01)*4, c.w*0.2, c.h*0.5, 0,0,TAU); ctx.fill(); }
+  }
+  // дымка у горизонта
+  const hz=ctx.createLinearGradient(0,H*0.62,0,H);
+  hz.addColorStop(0,'rgba(40,48,66,0)'); hz.addColorStop(1,'rgba(40,48,66,0.30)');
+  ctx.fillStyle=hz; ctx.fillRect(0,H*0.62,W,H*0.38);
+  // нетопыри — настоящий взмах крыльев (2 кадра: SPR.bat / SPR.bat_a)
+  if(!menuBats){ menuBats=[]; for(let i=0;i<10;i++) menuBats.push({x:Math.random()*W,y:Math.random()*H*0.62,v:rand(22,60),ph:rand(0,TAU),sc:rand(0.6,1.2)}); }
   for(const bt of menuBats){
-    bt.x-=bt.v*0.016; bt.ph+=0.12;
-    if(bt.x<-30){bt.x=W+30;bt.y=Math.random()*H*0.7;}
-    const fl=Math.sin(bt.ph)*0.5;
+    bt.x-=bt.v*0.016; bt.ph+=0.2;
+    if(bt.x<-30){bt.x=W+30;bt.y=Math.random()*H*0.62;}
+    const frame=(Math.sin(bt.ph)>0)?SPR.bat:SPR.bat_a;
     ctx.save();
-    ctx.translate(bt.x,bt.y+Math.sin(bt.ph*0.4)*6);
-    ctx.scale(bt.sc,bt.sc*(1+fl*0.4));
-    ctx.globalAlpha=0.5;
-    ctx.drawImage(SPR.bat,-15,-11);
+    ctx.translate(bt.x,bt.y+Math.sin(bt.ph*0.5)*5);
+    ctx.scale(bt.sc,bt.sc);
+    ctx.globalAlpha=0.72;
+    ctx.drawImage(frame,-frame.width/2,-frame.height/2);
     ctx.restore();
   }
   ctx.globalAlpha=1;
@@ -3102,7 +3246,7 @@ const _sprURL={};
 function sprURL(canvas,key){ if(_sprURL[key]!==undefined)return _sprURL[key]; _sprURL[key]=canvas?canvas.toDataURL():''; return _sprURL[key]; }
 function buildBestiary(){
   const g=$('bestGrid'); g.innerHTML='';
-  for(const t of ['zombie','bat','slime','spitter','brute','warper','boss']){
+  for(const t of ['zombie','bat','slime','spitter','brute','warper','gnat','boss']){
     const seen=!!meta.bestiary[t]||(t==='boss'&&meta.stats.bosses>0);
     const info=ENEMY_INFO[t];
     const c=document.createElement('div'); c.className='bcard'+(seen?'':' unseen');
