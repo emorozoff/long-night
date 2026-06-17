@@ -408,7 +408,7 @@ body.ingame,body.ingame *{cursor:none!important;}
    ===================================================================== */
 
 // ============================== UTILS ==============================
-const VERSION='0.52';
+const VERSION='0.53';
 const TAU = Math.PI*2;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const irand=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
@@ -2949,53 +2949,65 @@ function drawEnemies(px,py){
   if(bosses) for(const e of bosses) drawEnemy(e);
 }
 const BOSS_DRAW={}; // анимированная отрисовка боссов по bkind (пусто = generic спрайт)
-// Матерь роя — детальная паучиха: членистые перебирающие ноги, объёмное тело (градиенты), светящиеся глаза
+// Матерь роя — пиксельно-чанковая паучиха: плоские бэнды (без градиентов), квадратные сегментные ноги/глаза, узор, яйцеклад; анимация ног/дыхания/глаз сохранена
 BOSS_DRAW.matron=function(e,flashing){
-  const R=e.r*1.4, t=e.t;
-  const breathe=1+Math.sin(t*2.4)*0.025;
-  ctx.save();
-  ctx.translate(e.x,e.y);
-  // ноги: 8 (по 4 с каждой стороны), 2 сегмента, перебирают (sine-шаг с фазой)
-  ctx.lineCap='round'; ctx.lineJoin='round';
-  for(const s of [-1,1]){
-    for(let i=0;i<4;i++){
-      const hx=s*R*0.24, hy=(0.05+i*0.16)*R;          // бедро на головогруди
-      const th=0.7 - i*0.5;                            // веер: перед вниз → зад вверх
-      const lift=Math.max(0,Math.sin(t*7 + i*1.5 + (s<0?2.1:0)))*R*0.16;  // перебор
-      const fx=hx + s*Math.cos(th)*R, fy=hy + Math.sin(th)*R - lift*0.5;  // стопа
-      const mx=(hx+fx)/2 + s*R*0.08, my=(hy+fy)/2 - R*0.46 - lift;        // колено-апекс (вверх)
-      ctx.strokeStyle='#22101f'; ctx.lineWidth=R*0.13;
-      ctx.beginPath(); ctx.moveTo(hx,hy); ctx.quadraticCurveTo(mx,my,fx,fy); ctx.stroke();
-      ctx.strokeStyle='#4a1c42'; ctx.lineWidth=R*0.06;
-      ctx.beginPath(); ctx.moveTo(hx,hy); ctx.quadraticCurveTo(mx,my,fx,fy); ctx.stroke();
-      ctx.fillStyle='#1a0814'; ctx.beginPath(); ctx.arc(fx,fy,R*0.05,0,TAU); ctx.fill();
-    }
+  const R=e.r*1.4, t=e.t, ph=e.phase||0;
+  const breathe=1+Math.sin(t*(2.2+ph*0.9))*(0.03+ph*0.02);
+  const O='#1a0612', D='#3a1230', M='#7c1f4e', L='#a93a6e', HI='#d86a9a', BONE='#e8d6c0';
+  const band=(cx,cy,rx,ry,col)=>{ctx.fillStyle=col;ctx.beginPath();ctx.ellipse(cx,cy,rx,ry,0,0,TAU);ctx.fill();};
+  ctx.save(); ctx.translate(e.x,e.y);
+  // === НОГИ: 8, чанковые, 2 сегмента, перебор ===
+  ctx.lineCap='butt'; ctx.lineJoin='miter';
+  for(const s of [-1,1]) for(let i=0;i<4;i++){
+    const hx=s*R*0.26, hy=(0.18+i*0.14)*R;
+    const th=0.82 - i*0.5;
+    const lift=Math.max(0,Math.sin(t*7+i*1.4+(s<0?2.1:0)))*R*0.2;
+    const kx=hx+s*Math.cos(th)*R*0.74, ky=hy+Math.sin(th)*R*0.74 - R*0.44 - lift;
+    const fx=hx+s*Math.cos(th)*R*1.32, fy=hy+Math.sin(th)*R*1.32 - lift*0.4;
+    ctx.strokeStyle=O; ctx.lineWidth=R*0.15; ctx.beginPath(); ctx.moveTo(hx,hy); ctx.lineTo(kx,ky); ctx.lineTo(fx,fy); ctx.stroke();
+    ctx.strokeStyle=M; ctx.lineWidth=R*0.07; ctx.beginPath(); ctx.moveTo(hx,hy); ctx.lineTo(kx,ky); ctx.lineTo(fx,fy); ctx.stroke();
+    ctx.fillStyle=O; ctx.fillRect(fx-R*0.05,fy-R*0.05,R*0.1,R*0.1);
+    ctx.fillStyle=L; ctx.fillRect(kx-R*0.045,ky-R*0.045,R*0.09,R*0.09);
   }
-  // брюшко (объёмное, дыхание)
+  // === БРЮШКО: плоские бэнды + узор + яйцеклад, дыхание ===
   ctx.save(); ctx.scale(1,breathe);
-  const ab=ctx.createRadialGradient(-R*0.2,-R*0.55,R*0.08, 0,-R*0.2,R*1.0);
-  ab.addColorStop(0,'#b94d7a'); ab.addColorStop(0.55,'#7c1f4e'); ab.addColorStop(1,'#341028');
-  ctx.fillStyle=ab; ctx.beginPath(); ctx.ellipse(0,-R*0.2,R*0.82,R*0.92,0,0,TAU); ctx.fill();
-  ctx.fillStyle='rgba(34,8,26,0.5)'; ctx.beginPath(); ctx.ellipse(0,-R*0.25,R*0.24,R*0.5,0,0,TAU); ctx.fill();
-  ctx.fillStyle='rgba(225,160,190,0.22)'; ctx.beginPath(); ctx.ellipse(-R*0.24,-R*0.5,R*0.26,R*0.3,0,0,TAU); ctx.fill();
+  const ay=-R*0.24;
+  band(0,ay,R*0.86,R*0.98,O);
+  band(0,ay,R*0.78,R*0.9,D);
+  band(0,ay-R*0.02,R*0.6,R*0.7,M);
+  band(-R*0.05,ay-R*0.08,R*0.4,R*0.48,L);
+  band(-R*0.14,ay-R*0.2,R*0.2,R*0.26,HI);
+  ctx.fillStyle=BONE;
+  ctx.beginPath();
+  ctx.moveTo(-R*0.13,ay-R*0.12); ctx.lineTo(R*0.13,ay-R*0.12); ctx.lineTo(R*0.05,ay+R*0.04);
+  ctx.lineTo(R*0.15,ay+R*0.34); ctx.lineTo(-R*0.15,ay+R*0.34); ctx.lineTo(-R*0.05,ay+R*0.04);
+  ctx.closePath(); ctx.fill();
+  const sg=clamp(0.3+ph*0.26+Math.sin(t*4)*0.12,0,0.82);
+  ctx.fillStyle='rgba(255,104,142,'+sg.toFixed(2)+')';
+  ctx.beginPath(); ctx.ellipse(0,ay-R*0.64,R*0.24,R*0.17,0,0,TAU); ctx.fill();
   ctx.restore();
-  // головогрудь
-  const cg=ctx.createRadialGradient(-R*0.12,R*0.4,R*0.05, 0,R*0.5,R*0.55);
-  cg.addColorStop(0,'#822f5c'); cg.addColorStop(1,'#280e22');
-  ctx.fillStyle=cg; ctx.beginPath(); ctx.ellipse(0,R*0.45,R*0.5,R*0.46,0,0,TAU); ctx.fill();
-  // хелицеры (челюсти шевелятся)
-  const ch=Math.abs(Math.sin(t*7))*R*0.06;
-  ctx.strokeStyle='#180712'; ctx.lineWidth=R*0.09;
-  ctx.beginPath(); ctx.moveTo(-R*0.15,R*0.8); ctx.lineTo(-R*0.18-ch,R*1.0); ctx.moveTo(R*0.15,R*0.8); ctx.lineTo(R*0.18+ch,R*1.0); ctx.stroke();
-  // глаза (светятся)
-  const eg=(0.55+Math.sin(t*3.2)*0.35).toFixed(2);
-  ctx.fillStyle='rgba(255,42,64,'+eg+')';
-  for(const ey of [[-0.2,0.32],[-0.07,0.28],[0.07,0.28],[0.2,0.32],[-0.12,0.45],[0.12,0.45]]){
-    ctx.beginPath(); ctx.arc(ey[0]*R, R*0.4+ey[1]*R*0.4, R*0.05,0,TAU); ctx.fill();
+  // === ГОЛОВОГРУДЬ: бэнды ===
+  band(0,R*0.46,R*0.5,R*0.48,O);
+  band(0,R*0.46,R*0.42,R*0.4,D);
+  band(0,R*0.44,R*0.3,R*0.28,M);
+  band(-R*0.06,R*0.4,R*0.14,R*0.14,L);
+  // === ХЕЛИЦЕРЫ/КЛЫКИ ===
+  const ch=Math.abs(Math.sin(t*7))*R*0.05;
+  ctx.fillStyle=D;
+  ctx.fillRect(-R*0.2,R*0.78,R*0.12,R*0.2); ctx.fillRect(R*0.08,R*0.78,R*0.12,R*0.2);
+  ctx.fillStyle=BONE;
+  ctx.beginPath(); ctx.moveTo(-R*0.19,R*0.96); ctx.lineTo(-R*0.13,R*0.96); ctx.lineTo(-R*0.15-ch,R*1.14); ctx.closePath(); ctx.fill();
+  ctx.beginPath(); ctx.moveTo(R*0.19,R*0.96); ctx.lineTo(R*0.13,R*0.96); ctx.lineTo(R*0.15+ch,R*1.14); ctx.closePath(); ctx.fill();
+  // === ГЛАЗА: 8 квадратных, пульс + по фазе ===
+  const eg=clamp(0.55+ph*0.15+Math.sin(t*3.2)*0.3,0.2,1);
+  ctx.fillStyle='rgba(255,42,64,'+eg.toFixed(2)+')';
+  const es=R*0.065;
+  for(const ey of [[-0.18,0.0],[-0.06,-0.04],[0.06,-0.04],[0.18,0.0],[-0.25,0.17],[-0.09,0.18],[0.09,0.18],[0.25,0.17]]){
+    ctx.fillRect(ey[0]*R-es/2, R*0.56+ey[1]*R-es/2, es, es);
   }
   if(flashing){ ctx.globalAlpha=clamp(e.flash*4,0,0.5); ctx.fillStyle='#fff';
-    ctx.beginPath(); ctx.ellipse(0,-R*0.2,R*0.82,R*0.92,0,0,TAU); ctx.fill();
-    ctx.beginPath(); ctx.ellipse(0,R*0.45,R*0.5,R*0.46,0,0,TAU); ctx.fill(); ctx.globalAlpha=1; }
+    ctx.save(); ctx.scale(1,breathe); band(0,-R*0.24,R*0.86,R*0.98); ctx.restore();
+    band(0,R*0.46,R*0.5,R*0.48); ctx.globalAlpha=1; }
   ctx.restore();
 };
 function drawEnemy(e){
