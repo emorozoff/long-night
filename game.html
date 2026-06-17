@@ -107,11 +107,14 @@ h1,h2,.serif{font-family:var(--pix);}
 
 /* ---------- выбор локации ---------- */
 #locRow,#pickLocGrid{display:flex;gap:10px;flex-wrap:wrap;justify-content:center;max-width:760px;}
-.locchip{pointer-events:auto;cursor:pointer;border:1px solid #4a2433;border-radius:8px;padding:9px 14px;
-  background:linear-gradient(180deg,#1c1118,#120a10);transition:.15s;width:225px;text-align:left;}
+.locchip{pointer-events:auto;cursor:pointer;border:1px solid #4a2433;border-radius:8px;padding:10px 14px;
+  background:linear-gradient(180deg,#1c1118,#120a10);transition:.15s;width:300px;text-align:left;display:flex;align-items:center;gap:12px;}
 .locchip:hover{border-color:#8a3a4a;}
-.locchip .ln{font-family:var(--ui);font-weight:600;font-size:15px;color:#eee;letter-spacing:1px;}
-.locchip .ld{font-size:11px;color:#9a8a92;margin-top:3px;line-height:1.4;}
+.locchip .loco{width:54px;height:54px;flex:none;image-rendering:pixelated;}
+.locchip .ltx{min-width:0;}
+.locchip .ln{font-family:var(--pix);font-size:17px;color:#eee;letter-spacing:1px;line-height:1.15;}
+.locchip .ld{font-family:var(--pix);font-size:13px;color:#9a8a92;margin-top:5px;line-height:1.5;letter-spacing:.5px;}
+#scrHeroes .hint,#scrPickLoc .hint{font-family:var(--pix);font-size:13px;letter-spacing:1px;}
 .locchip.sel{border-color:var(--gold);box-shadow:0 0 14px #e7b54a33;}
 .locchip.sel .ln{color:var(--gold);}
 .locchip.lock{opacity:.45;cursor:default;}
@@ -235,10 +238,10 @@ h1,h2,.serif{font-family:var(--pix);}
 .mcard.herosel{border-color:var(--gold);box-shadow:0 0 16px #e7b54a44;}
 .mcard.herolock{opacity:.7;}
 .mcard.herolock .mcost{color:#cab;}
-.mname{font-family:var(--ui);font-weight:700;font-size:16px;color:#fff;}
-.mdesc{font-size:12px;color:#a896a2;margin:5px 0;}
+.mname{font-family:var(--pix);font-size:19px;color:#fff;letter-spacing:1px;}
+.mdesc{font-family:var(--pix);font-size:13px;color:#a896a2;margin:6px 0;line-height:1.55;letter-spacing:.5px;}
 .mlv{font-size:11px;letter-spacing:2px;color:var(--red);}
-.mcost{margin-top:6px;color:var(--gold);font-size:14px;}
+.mcost{font-family:var(--pix);margin-top:7px;color:var(--gold);font-size:16px;letter-spacing:1px;}
 #heroGrid .mcard{text-align:center;}
 .mcard .hico{display:block;margin:0 auto 7px;width:60px;height:72px;image-rendering:pixelated;}
 #expWrap{width:min(640px,90vw);display:flex;flex-direction:column;gap:8px;align-items:center;}
@@ -408,7 +411,7 @@ body.ingame,body.ingame *{cursor:none!important;}
    ===================================================================== */
 
 // ============================== UTILS ==============================
-const VERSION='0.53';
+const VERSION='0.54';
 const TAU = Math.PI*2;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const irand=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
@@ -1173,6 +1176,26 @@ function buildTitleTex(){ return mkCanvas(120,80,(g,w,h)=>{
   for(let k=0;k<5;k++){ g.fillRect(Math.random()*w|0, Math.random()*h*0.5|0, 1, 8+(Math.random()*16|0)); }
   g.globalAlpha=1;
 }); }
+// иконки-визуализации локаций (пиксель-сцены)
+{ const LPAL={
+    w:'#23484c', W:'#3a6c70',
+    r:'#5a1420', R:'#9a1c2e', q:'#c2233c',
+    t:'#2c2014', T:'#4a3826',
+    b:'#5a4636', B:'#34281c', s:'#5a5560', S:'#8a8692',
+    o:'#7a2a22', O:'#4a1814',
+    f:'#ff6020', F:'#ffb030', e:'#8a1408',
+    i:'#7ac8da', I:'#bfe8f2',
+    k:'#160e0c', g:'#caa24a', h:'#6e655c', H:'#9a9086'
+  };
+  const lico=rows=>px(rows,LPAL,4,'#0b0710');
+  SPR.locIco={
+    grave:lico(['...OOOOOO...','..OooooooO..','.OooooooooO.','.bBBBBBBBBb.','.bBggkkggBb.','.bBBBBBBBBb.','~W~bBBBBb~W~','wWw~wWw~wWw~','WwwWwwWwwWww','wWwwWwwWwwWw','WwwWwwWwwWww']),
+    swamp:lico(['....T..T....','....t..t....','..T.t..t.T..','..t.t..t.t..','..t.t..t.t..','rRrrRrrRrrRr','RrrRrrRrrRrr','rRTTrrrTTrRr','RrrRrrRrrRrr','rRrrRrrRrrRr','RrrRrrRrrRrr']),
+    ash:lico(['...T...TT...','..T.T.TtT...','...TTtTT....','....TtT.....','....TtT.....','....TtT.....','...fTtTf....','hHhfHhFhhHfh','HhhHfhhHhFhH','hHhhHhfHhhHh','HhhHhhHhhHhh']),
+    crypt:lico(['....IIII....','...sSSSSs...','..sSSSSSSs..','.sSSSSSSSSs.','.sSsIIIIsSs.','.sSSSSSSSSs.','.sSSSSSSSSs.','iI~ssssss~Ii','Ii~iIi~iIi~I','iIiiIiiIiiIi','IiiIiiIiiIii']),
+    inferno:lico(['...f....f...','..fF...fF...','..fFf.fFf...','eFfFfeFfFfeF','kekfkekfkeke','ekefkekekfke','kfkekekfkeke','ekekfkekekfk','kekekekekeke','ekekekekekek','kekekekekeke'])
+  };
+}
 // препятствия: редкие твёрдые коллайдеры, детерминированно по миру; тормозят ТОЛЬКО игрока
 const OBST_CELL=360, OBST_R=15;
 function obstacleAt(cx,cy){
@@ -3645,7 +3668,8 @@ function buildPickLoc(){
     if(best<L.req) continue; // закрытые локации скрыты
     const el=document.createElement('div');
     el.className='locchip'+(meta.loc===L.id?' sel':'');
-    el.innerHTML='<div class="ln">'+L.name+'</div><div class="ld">'+L.desc+'</div>';
+    el.innerHTML='<img class="loco" src="'+sprURL(SPR.locIco[L.id],'loc_'+L.id)+'" alt="">'+
+      '<div class="ltx"><div class="ln">'+L.name+'</div><div class="ld">'+L.desc+'</div></div>';
     el.onclick=()=>{ meta.loc=L.id; saveMeta(); A.click(); startRun(); };
     g.appendChild(el);
   }
