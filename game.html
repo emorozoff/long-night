@@ -407,7 +407,7 @@ body.ingame,body.ingame *{cursor:none!important;}
    ===================================================================== */
 
 // ============================== UTILS ==============================
-const VERSION='0.49';
+const VERSION='0.50';
 const TAU = Math.PI*2;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const irand=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
@@ -814,14 +814,26 @@ function px(rows,pal,s,outline){
   return outline===false?inner:addOutline(inner,outline||'#0b0710',s);
 }
 function buildSprites(){
-  // --- player: охотник на нечисть ---
-  const PP={H:'#221a2c',h:'#3a2c46',f:'#e8c6a0',F:'#c49a72',e:'#201018',c:'#8c1426',C:'#c2233c',g:'#e7c24a',l:'#5a3a28',b:'#241018'};
-  const pbody=[
-    '...HHHHH...','..HhhhhhH..','..HhFFFhH..','..HhfffhH..','..HhefehH..',
-    '...FfFfF...','.ccCCCCCcc.','.lcCCgCCcl.','.lccCCCccl.','.lccCCCccl.',
-    '..cCCgCCc..','..cCCCCCc..','..b.....b..','.bb.....bb.'];
-  SPR.player=px(pbody,PP,3);
-  SPR.player_a=px(pbody.slice(0,11).concat(['..cCCCCCc..','...b...b...','..bb...bb..']),PP,3);
+  // --- players: 4 героя, спрайт выбирается по run.hero в drawPlayer ---
+  const HEROSPR={
+    hunter:{pal:{H:'#221a2c',h:'#3a2c46',f:'#e8c6a0',F:'#c49a72',e:'#201018',c:'#8c1426',C:'#c2233c',g:'#e7c24a',l:'#5a3a28',b:'#241018'},
+      rows:['...HHHHH...','..HhhhhhH..','..HhFFFhH..','..HhfffhH..','..HhefehH..','...FfFfF...','.ccCCCCCcc.','.lcCCgCCcl.','.lccCCCccl.','.lccCCCccl.','..cCCgCCc..','..cCCCCCc..','..b.....b..','.bb.....bb.'],
+      walk:['...b...b...','..bb...bb..']},
+    paladin:{pal:{A:'#6f7888',S:'#aeb7c6',B:'#3e4654',W:'#e9ecf2',r:'#c2233c',y:'#e7c24a',e:'#dfeaff'},
+      rows:['...AAAAA...','..ASSSSSA..','..ASSSSSA..','..ABBBBBA..','..ASeSeSA..','..AASSSAA..','.SSWWWWWSS.','.SSWWrWWSS.','.SSWrrrWSS.','.SSWWrWWSS.','..SWWWWWS..','..SyWWWyS..','..A.....A..','.AA.....AA.'],
+      walk:['...A...A...','..AA...AA..']},
+    warlock:{pal:{P:'#2e1a44',p:'#4a2a6e',u:'#7a4aa8',x:'#e24bff',f:'#c9b2d6',F:'#7a5e90'},
+      rows:['...PPPPP...','..PpppppP..','..PpFFFpP..','..PpfFfpP..','..PpxFxpP..','...pfFfp...','.PpppppppP.','.PpuuuuupP.','.PpuxuxupP.','.PpuuuuupP.','..PpuuupP..','..PppppP...','..PpppppP..','..p.p.p.p..'],
+      walk:['..PpppppP..','.p.p.p.p.p.']},
+    inquisitor:{pal:{K:'#15101c',k:'#2c1c28',f:'#e7c79c',F:'#bf966a',e:'#201018',C:'#7a1020',c:'#c2233c',n:'#ded7cb',o:'#e7c24a',b:'#201018'},
+      rows:['...KKKKK...','...KkkkK...','..KKKKKKK..','.KKKKKKKKK.','...fFfFf...','...fefef...','...fFFFf...','..nnnnnnn..','.CCnnonnCC.','.CcCoooCcC.','.CcCnonCcC.','.CcCCoCCcC.','..CCCCCCC..','..bb...bb..'],
+      walk:['..CCCCCCC..','...b...b...']}
+  };
+  for(const id in HEROSPR){ const h=HEROSPR[id];
+    SPR['player_'+id]=px(h.rows,h.pal,3);
+    SPR['player_'+id+'_a']=px(h.rows.slice(0,12).concat(h.walk),h.pal,3);
+  }
+  SPR.player=SPR.player_hunter; SPR.player_a=SPR.player_hunter_a;
   // --- враги: 2 кадра ходьбы (нижние ряды смещаются в противофазе) ---
   const shiftRow=(row,dx)=>{let o='';for(let x=0;x<row.length;x++){const s=x-dx;o+=(s>=0&&s<row.length)?row[s]:'.';}return o;};
   const stepRows=rows=>{const r=rows.slice(),n=r.length;if(n>=2){r[n-1]=shiftRow(r[n-1],1);r[n-2]=shiftRow(r[n-2],-1);}return r;};
@@ -3066,7 +3078,9 @@ function drawPlayer(){
   ctx.fillStyle='rgba(0,0,0,0.35)';
   ctx.beginPath();ctx.ellipse(p.x,p.y+14,11,4.5,0,0,TAU);ctx.fill();
   const bob=p.moving?Math.sin(performance.now()*0.018)*1.6:0;
-  const pf=(p.moving&&Math.floor(performance.now()*0.009)%2)?SPR.player_a:SPR.player;
+  const hid=(run&&run.hero)||'hunter';
+  const idle=SPR['player_'+hid]||SPR.player_hunter, walk=SPR['player_'+hid+'_a']||SPR.player_hunter_a;
+  const pf=(p.moving&&Math.floor(performance.now()*0.009)%2)?walk:idle;
   ctx.save();
   ctx.translate(p.x,p.y+bob);
   ctx.scale(p.face,1);
