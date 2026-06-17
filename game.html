@@ -113,8 +113,7 @@ h1,h2,.serif{font-family:var(--pix);}
 .locchip .loco{width:54px;height:54px;flex:none;image-rendering:pixelated;}
 .locchip .ltx{min-width:0;}
 .locchip .ln{font-family:var(--pix);font-size:17px;color:#eee;letter-spacing:1px;line-height:1.15;}
-.locchip .ld{font-family:var(--pix);font-size:13px;color:#9a8a92;margin-top:5px;line-height:1.5;letter-spacing:.5px;}
-#scrHeroes .hint,#scrPickLoc .hint{font-family:var(--pix);font-size:13px;letter-spacing:1px;}
+.locchip .ld{font-family:var(--ui);font-size:12px;color:#9a8a92;margin-top:5px;line-height:1.45;}
 .locchip.sel{border-color:var(--gold);box-shadow:0 0 14px #e7b54a33;}
 .locchip.sel .ln{color:var(--gold);}
 .locchip.lock{opacity:.45;cursor:default;}
@@ -239,7 +238,7 @@ h1,h2,.serif{font-family:var(--pix);}
 .mcard.herolock{opacity:.7;}
 .mcard.herolock .mcost{color:#cab;}
 .mname{font-family:var(--pix);font-size:19px;color:#fff;letter-spacing:1px;}
-.mdesc{font-family:var(--pix);font-size:13px;color:#a896a2;margin:6px 0;line-height:1.55;letter-spacing:.5px;}
+.mdesc{font-family:var(--ui);font-size:12.5px;color:#a896a2;margin:6px 0;line-height:1.5;}
 .mlv{font-size:11px;letter-spacing:2px;color:var(--red);}
 .mcost{font-family:var(--pix);margin-top:7px;color:var(--gold);font-size:16px;letter-spacing:1px;}
 #heroGrid .mcard{text-align:center;}
@@ -411,7 +410,7 @@ body.ingame,body.ingame *{cursor:none!important;}
    ===================================================================== */
 
 // ============================== UTILS ==============================
-const VERSION='0.54';
+const VERSION='0.55';
 const TAU = Math.PI*2;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const irand=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
