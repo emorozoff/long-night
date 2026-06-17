@@ -74,7 +74,9 @@ h1,h2,.serif{font-family:var(--pix);}
 .divline{width:240px;max-width:60vw;height:1px;border:0;margin:2px 0 2px;
   background:linear-gradient(90deg,transparent,#6a3038,transparent);}
 .titlewrap{position:relative;display:inline-block;}
-.title{font-family:var(--pix);font-size:min(104px,15vw);letter-spacing:4px;color:#c01524;margin:0;line-height:1;
+.title{font-family:var(--pix);font-size:min(104px,15vw);letter-spacing:4px;margin:0;line-height:1;color:#c01524;
+  background-image:var(--titletex),linear-gradient(180deg,#f44a57 0%,#d81f30 44%,#8f1019 100%);
+  -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
   text-shadow:0 0 12px rgba(150,12,22,0.38),0 3px 0 #2a0810,0 5px 14px #000;animation:titlepulse 3.6s ease-in-out infinite;}
 @keyframes titlepulse{0%,100%{text-shadow:0 0 10px rgba(150,12,22,0.34),0 3px 0 #2a0810,0 5px 14px #000}
   50%{text-shadow:0 0 22px rgba(186,24,38,0.5),0 3px 0 #2a0810,0 5px 14px #000}}
@@ -88,23 +90,27 @@ h1,h2,.serif{font-family:var(--pix);}
 .drip.d3{left:62%;animation-duration:6.1s;animation-delay:3.4s}
 .drip.d4{left:85%;animation-duration:7.4s;animation-delay:1.2s}
 .subtitle{font-family:var(--pix);color:var(--dim);letter-spacing:3px;font-size:20px;margin-top:-2px;}
-.btn{pointer-events:auto;cursor:pointer;border:2px solid #3b3f4a;border-radius:5px;color:#d6d0c4;
-  background:linear-gradient(180deg,#2b2e38,#191b22);padding:11px 24px;font-size:22px;letter-spacing:1px;
-  font-family:var(--pix);transition:.12s;text-shadow:0 1px 2px #000;
-  box-shadow:inset 0 1px 0 rgba(255,255,255,0.07),inset 0 -3px 6px rgba(0,0,0,0.4),0 3px 0 #0b0c11;}
-.btn:hover{border-color:#7a2a36;color:#f3ece0;background:linear-gradient(180deg,#34323b,#201d25);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,0.09),0 0 16px #d4203a33,0 3px 0 #0b0c11;transform:translateY(-2px);}
-.btn:active{transform:translateY(1px);box-shadow:inset 0 2px 7px rgba(0,0,0,0.6);}
-.btn.big{font-size:34px;padding:15px 68px;border:2px solid #565a62;border-radius:6px;color:#efe9dc;
-  background:linear-gradient(180deg,#34373f,#202229);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,0.10),inset 0 -4px 9px rgba(0,0,0,0.45),0 4px 0 #0c0d12,0 0 24px rgba(0,0,0,0.4);}
-.btn.big:hover{border-color:#8a323c;background:linear-gradient(180deg,#3c3942,#26222b);
-  box-shadow:inset 0 1px 0 rgba(255,255,255,0.12),0 0 30px #d4203a44,0 4px 0 #0c0d12;transform:translateY(-2px);}
+.btn{pointer-events:auto;cursor:var(--cur,pointer);border:2px solid #46343a;border-radius:5px;color:#d9d2c4;
+  background:linear-gradient(180deg,#3b3e48 0%,#2c2e37 50%,#1b1d24 100%);padding:11px 24px;font-size:22px;letter-spacing:1px;
+  font-family:var(--pix);transition:.12s;text-shadow:0 1px 2px #000;position:relative;isolation:isolate;
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.09),inset 0 -3px 6px rgba(0,0,0,0.5),inset 0 0 0 1px rgba(0,0,0,0.35),0 3px 0 #0a0b10,0 5px 9px rgba(0,0,0,0.4);}
+.btn::before{content:'';position:absolute;inset:0;z-index:-1;border-radius:inherit;pointer-events:none;
+  background-image:var(--btntex);background-size:cover;background-position:center;mix-blend-mode:soft-light;opacity:.8;}
+.btn:hover{border-color:#9a3a46;color:#f5eee2;background:linear-gradient(180deg,#454852 0%,#33353e 50%,#22242c 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.11),inset 0 -3px 6px rgba(0,0,0,0.5),inset 0 0 0 1px rgba(0,0,0,0.3),0 0 16px #d4203a33,0 3px 0 #0a0b10,0 5px 9px rgba(0,0,0,0.4);transform:translateY(-2px);}
+.btn:active{transform:translateY(1px);box-shadow:inset 0 2px 8px rgba(0,0,0,0.65),inset 0 0 0 1px rgba(0,0,0,0.4);}
+.btn.big{font-size:34px;padding:15px 68px;border:2px solid #5a4248;border-radius:6px;color:#efe9dc;
+  background:linear-gradient(180deg,#43464f 0%,#34363f 50%,#202229 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.12),inset 0 -4px 9px rgba(0,0,0,0.5),inset 0 0 0 1px rgba(0,0,0,0.3),0 4px 0 #0b0c11,0 6px 12px rgba(0,0,0,0.45);}
+.btn.big:hover{border-color:#a23a44;background:linear-gradient(180deg,#4c4f58 0%,#3a3c45 50%,#26282f 100%);
+  box-shadow:inset 0 1px 0 rgba(255,255,255,0.14),inset 0 -4px 9px rgba(0,0,0,0.5),inset 0 0 0 1px rgba(0,0,0,0.3),0 0 30px #d4203a44,0 4px 0 #0b0c11,0 6px 12px rgba(0,0,0,0.45);transform:translateY(-2px);}
 .btn.big .ar{color:var(--red);text-shadow:0 0 10px #d4203aaa;}
 .btnrow{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;align-items:flex-end;}
 .btnrow .btn{min-width:150px;text-align:center;}
 .hint{color:var(--dim);font-size:13px;margin-top:10px;}
-.goldrow{font-family:var(--pix);color:var(--gold);font-size:17px;letter-spacing:1px;border:2px solid #6a5320;border-bottom:none;border-radius:5px 5px 0 0;background:#15110a;padding:0 14px;margin-bottom:-2px;position:relative;z-index:1;text-shadow:0 0 8px rgba(231,181,74,0.4);}
+.goldrow{font-family:var(--pix);color:var(--gold);font-size:17px;letter-spacing:1px;border:2px solid #6a5320;border-bottom:none;border-radius:5px 5px 0 0;background:#15110a;padding:0 14px;margin-bottom:-2px;position:relative;z-index:1;text-shadow:0 0 8px rgba(231,181,74,0.4);transition:transform .12s,box-shadow .12s;}
+.btncol:has(.btn:hover) .goldrow{transform:translateY(-2px);box-shadow:0 0 11px rgba(231,181,74,0.32);}
+.btncol:has(.btn:active) .goldrow{transform:translateY(1px);}
 .btncol{display:flex;flex-direction:column;align-items:center;gap:0;}
 .bico{width:22px;height:22px;image-rendering:pixelated;vertical-align:-5px;margin-right:8px;}
 
@@ -263,6 +269,11 @@ h1,h2,.serif{font-family:var(--pix);}
 .deathtitle{font-size:54px;letter-spacing:8px;color:var(--red);font-family:var(--pix);text-shadow:0 0 30px #d4203a66,0 3px 8px #000;}
 
 ::-webkit-scrollbar{width:8px}::-webkit-scrollbar-thumb{background:#3a2030;border-radius:4px}::-webkit-scrollbar-track{background:#120a10}
+
+/* ---------- пиксельный курсор (меню); в игре прячется ---------- */
+body{cursor:var(--cur,auto);}
+.locchip,.mcard,.toggle,.lvlbtn,.dvb,#verCorner,#btnFull,#btnPauseTouch,.ach,.ichip{cursor:var(--cur,pointer);}
+body.ingame,body.ingame *{cursor:none!important;}
 </style>
 </head>
 <body>
@@ -405,7 +416,7 @@ h1,h2,.serif{font-family:var(--pix);}
    ===================================================================== */
 
 // ============================== UTILS ==============================
-const VERSION='0.43';
+const VERSION='0.44';
 const TAU = Math.PI*2;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const irand=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
@@ -1132,6 +1143,24 @@ buildSprites();
       '..CCnnonnCC..','.CcCnooonCcC.','.CcCnnonnCcC.','.CcCCnonCCcC.','..CCCCnCCCC..','..CcCCCCCcC..'])
   };
 }
+// пиксельный курсор-стрелка (применяется к UI в меню; в игре прячется)
+SPR.cursor=px(['W..........','WW.........','WWW........','WWWW.......','WWWWW......','WWWWWW.....','WWWWWWW....','WWWWWWWW...','WWWWWWWWW..','WWWWWWWWWW.','WWWWWWW....','WWW.WWW....','WW...WWW...','.....WWW...','......WWW..','.......WW..'],{W:'#efe7d9'},2,'#161018');
+// процедурные текстуры UI: камень+царапины для кнопок, выветривание (мотл) для заголовка — генерим один раз
+function buildBtnTex(){ return mkCanvas(160,54,(g,w,h)=>{
+  const im=g.createImageData(w,h),d=im.data;
+  for(let i=0;i<d.length;i+=4){ const a=Math.random()<0.5?0:(Math.random()*70|0); const c=Math.random()<0.5?42:208; d[i]=d[i+1]=d[i+2]=c; d[i+3]=a; }
+  g.putImageData(im,0,0); g.lineWidth=1;
+  const sc=(x1,y1,x2,y2,col,a)=>{g.strokeStyle=col;g.globalAlpha=a;g.beginPath();g.moveTo(x1,y1);g.lineTo(x2,y2);g.stroke();};
+  sc(10,11,70,17,'#000',.32); sc(90,40,152,31,'#000',.3); sc(24,46,82,40,'#000',.24); sc(116,8,152,15,'#000',.22);
+  sc(11,10,71,16,'#fff',.1); sc(38,30,98,35,'#fff',.07); sc(94,15,142,11,'#fff',.06); g.globalAlpha=1;
+}); }
+function buildTitleTex(){ return mkCanvas(120,80,(g,w,h)=>{
+  const im=g.createImageData(w,h),d=im.data;
+  for(let i=0;i<d.length;i+=4){ let a=0; if(Math.random()>0.87) a=Math.random()*55|0; d[i]=d[i+1]=d[i+2]=8; d[i+3]=a; }
+  g.putImageData(im,0,0); g.globalAlpha=.09; g.fillStyle='#000';
+  for(let k=0;k<5;k++){ g.fillRect(Math.random()*w|0, Math.random()*h*0.5|0, 1, 8+(Math.random()*16|0)); }
+  g.globalAlpha=1;
+}); }
 // препятствия: редкие твёрдые коллайдеры, детерминированно по миру; тормозят ТОЛЬКО игрока
 const OBST_CELL=360, OBST_R=15;
 function obstacleAt(cx,cy){
@@ -3364,6 +3393,7 @@ function setState(s){
   if(SCREEN_MAP[s]) $(SCREEN_MAP[s]).classList.remove('hidden');
   $('hud').classList.toggle('hidden',!(s==='playing'||s==='paused'||s==='levelup'));
   $('btnPauseTouch').classList.toggle('show',s==='playing');
+  document.body.classList.toggle('ingame',s==='playing');
   if(s==='paused'&&run)
     $('pauseStats').textContent=fmtTime(run.time)+' · уровень '+run.level+' · убийств: '+run.stats.kills;
   if(s==='menu') updateMenu();
@@ -3663,6 +3693,10 @@ $('verCorner').textContent='v'+VERSION;
 $('verCorner').addEventListener('click', devTapVersion);
 $('devPanel').addEventListener('click', e=>{ const b=e.target.closest('button[data-act]'); if(b) devAction(b.dataset.act, b.dataset.arg); });
 { const mi=SPR.menuIco; $('icoShop').src=sprURL(mi.shop,'mi_s'); $('icoStats').src=sprURL(mi.stats,'mi_t'); $('icoBest').src=sprURL(mi.best,'mi_b'); $('icoSet').src=sprURL(mi.set,'mi_g'); }
+// процедурные UI-текстуры и пиксельный курсор — генерим один раз на старте
+document.documentElement.style.setProperty('--cur','url("'+sprURL(SPR.cursor,'cur')+'") 2 2, auto');
+document.documentElement.style.setProperty('--btntex','url("'+buildBtnTex().toDataURL()+'")');
+document.documentElement.style.setProperty('--titletex','url("'+buildTitleTex().toDataURL()+'")');
 setState('menu');
 requestAnimationFrame(loop);
 </script>
