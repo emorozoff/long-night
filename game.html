@@ -410,7 +410,7 @@ body.ingame,body.ingame *{cursor:none!important;}
    ===================================================================== */
 
 // ============================== UTILS ==============================
-const VERSION='0.57';
+const VERSION='0.59';
 const TAU = Math.PI*2;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const irand=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
@@ -1475,8 +1475,7 @@ function applyUpgrade(d){
 function noChoices(){
   const n=Math.max(1,run.lvlQueue); // компенсация за КАЖДЫЙ уровень в очереди
   run.p.hp=Math.min(run.p.maxhp,run.p.hp+30*n);
-  run.goldBonus+=15*n;
-  addText(run.p.x,run.p.y-20,'+'+(30*n)+' HP  +◆'+(15*n),'#7ce86a',16);
+  addText(run.p.x,run.p.y-20,'+'+(30*n)+' HP','#7ce86a',16); // (Заход 6) утешит. золото убрано, HP оставлено
   run.lvlQueue=0;
   if(state==='levelup') setState('playing');
 }
@@ -1541,8 +1540,7 @@ function doSkip(){
   if(state!=='levelup') return;
   run.banishMode=false;
   run.p.hp=Math.min(run.p.maxhp,run.p.hp+12);
-  run.goldBonus+=6;
-  addText(run.p.x,run.p.y-20,'+12 HP  +◆6','#7ce86a',15);
+  addText(run.p.x,run.p.y-20,'+12 HP','#7ce86a',15); // (Заход 6) золото за бан убрано, HP оставлено
   A.click();
   run.lvlQueue=Math.max(0,run.lvlQueue-1);
   if(run.lvlQueue>0) openChoices('УРОВЕНЬ '+run.level); else setState('playing');
@@ -1602,8 +1600,8 @@ function addText(x,y,str,color,size){
 }
 function addBurst(x,y,color,n,spd,life,size){
   if(!run) return;
-  if(meta.settings.perf) n=Math.ceil(n*0.4);
-  const cap=meta.settings.perf?300:600;
+  if(meta.settings.perf||_fps<35) n=Math.ceil(n*0.4); // адаптив: режем партиклы при просадке FPS (Заход 7)
+  const cap=(_fps<32)?180:(meta.settings.perf?300:600);
   for(let i=0;i<n;i++){
     if(run.parts.length>cap) return;
     const a=rand(0,TAU),v=rand(0.3,1)*spd;
@@ -1686,8 +1684,8 @@ function killEnemy(e){
   if(!e.boss&&!e.elite){
     if(chance(0.0023+run.heartDrop)) run.gems.push({x:e.x,y:e.y,v:0,kind:'heart',mag:false,vx:0,vy:0,t:0});
     // монеты по силе врага: мясо почти не даёт, крупные/опасные — выплаты
-    const cc=(0.004+e.xp*0.0035)/20; // монеты в 20× реже (Заход 5) — редкая, но ценная, «звон» = событие
-    if(chance(cc)) run.gems.push({x:e.x,y:e.y,v:irand(1,2+Math.round(e.xp*1.2)),kind:'coin',mag:false,vx:0,vy:0,t:0});
+    const cc=(0.004+e.xp*0.0035)*COINK; // коэффициент по силе моба → кубик → 1 монета (Заход 6; COINK калибруется)
+    if(chance(cc)) run.gems.push({x:e.x,y:e.y,v:1,kind:'coin',mag:false,vx:0,vy:0,t:0}); // РОВНО 1 монета
   }
   if(e.elite) {
     run.stats.elites++;
@@ -1697,7 +1695,7 @@ function killEnemy(e){
   }
   if(e.boss){
     run.stats.bosses++;
-    run.goldBonus+=40*e.boss;
+    // (Заход 6) боссовое авто-золото убрано — золото только с подобранных монет
     run.gems.push({x:e.x,y:e.y,v:0,kind:'heart',mag:false,vx:0,vy:0,t:0});
     run.gems.push({x:e.x-32,y:e.y,v:0,kind:'magnet',mag:false,vx:0,vy:0,t:0});
     run.gems.push({x:e.x+32,y:e.y,v:0,kind:'bomb',mag:false,vx:0,vy:0,t:0});
@@ -1715,7 +1713,7 @@ function winGame(){
   $('lowhp').classList.remove('on'); $('banner').classList.remove('show');
   recordRun(true);
   A.victory();
-  run.earned=Math.max(1,Math.round((s.kills*0.3+run.time*0.4+s.bosses*60+s.elites*12+run.goldBonus+800)*run.goldMul));
+  run.earned=Math.max(0,Math.round(run.goldBonus*run.goldMul)); // золото = ТОЛЬКО собранные монеты (Заход 6)
   meta.gold+=run.earned;
   if(!meta.best||run.time>meta.best.time) meta.best={time:run.time,level:run.level,kills:s.kills};
   saveMeta();
@@ -1810,7 +1808,7 @@ function gameOver(){
   $('lowhp').classList.remove('on');
   $('banner').classList.remove('show');
   recordRun(false);
-  run.earned=Math.max(1,Math.round((s.kills*0.3+run.time*0.4+s.bosses*60+s.elites*12+run.goldBonus)*run.goldMul));
+  run.earned=Math.max(0,Math.round(run.goldBonus*run.goldMul)); // золото = ТОЛЬКО собранные монеты (Заход 6)
   meta.gold+=run.earned;
   if(!meta.best||run.time>meta.best.time) meta.best={time:run.time,level:run.level,kills:s.kills};
   saveMeta();
@@ -1847,9 +1845,7 @@ function addXP(v){
   run.xp+=v;
   let leveled=false;
   while(run.xp>=run.xpNext){
-    // ЗАПЛАТКА (баг опыта, см. roadmap): не больше 3 уровней за раз — очередь карт не растёт выше 3, излишек XP сбрасывается
-    if(run.lvlQueue>=3){ run.xp=Math.min(run.xp,run.xpNext-1); break; }
-    run.xp-=run.xpNext; run.level++; run.xpNext=xpNeeded(run.level);
+    run.xp-=run.xpNext; run.level++; run.xpNext=xpNeeded(run.level); // заплатка lvlQueue<=3 убрана (корень — двойной сбор — устранён в updateGems)
     run.lvlQueue++; leveled=true;
   }
   xplog('addXP',()=>({in:v,from:lb,to:run.level,q:run.lvlQueue}));
@@ -1861,8 +1857,7 @@ function addXP(v){
 }
 function chestOpen(){
   run.stats.chests++;
-  run.goldBonus+=15;
-  run.lvlQueue++;
+  run.lvlQueue++; // (Заход 6) золото сундука убрано — награда сундука = выбор предмета
   A.chestS();
   openChoices('ДАР СКЛЕПА');
 }
@@ -1966,7 +1961,7 @@ function fireWeapons(dt){
       if(!rose) for(const e of run.en){ if(e.dead) continue; const d=dist2(p.x,p.y,e.x,e.y); if(d<bd){bd=d;tgt=e;} }
       if(!rose && !tgt) wt.scythe=0.2;
       else{
-        const n=rose?(evo?12:8):((lv>=3?3:2)+(evo?2:0));   // чаще и шире: 2/3 + роза(8/12)
+        const n=rose?(evo?6:4):((lv>=3?2:1)+(evo?1:0)); // кол-во ÷2 (Заход 6)   // чаще и шире: 2/3 + роза(8/12)
         const base=rose?rand(0,TAU):Math.atan2(tgt.y-p.y,tgt.x-p.x);
         const dmg=(15+7*lv)*p.dmgMul*(evo?1.4:1);
         for(let i=0;i<n;i++){
@@ -1985,7 +1980,7 @@ function fireWeapons(dt){
     if(wt.mortar<=0){
       const lv=wl.mortar, evo=run.evo.mortar;
       // КОЛЬЦО ОГНЯ: горшки падают равномерно по кругу вокруг героя (фикс. радиус)
-      const n=(2+lv)+(evo?3:0);          // 3..7 горшков (+эво) — кольцо
+      const n=lv+(evo?3:0);              // lv1=1 лужа, далее по уровням (Заход 6)
       const R=78+8*lv;                    // фикс. радиус кольца
       const off=rand(0,TAU);
       for(let i=0;i<n;i++){
@@ -1993,7 +1988,7 @@ function fireWeapons(dt){
         run.pots.push({x0:p.x,y0:p.y,x1:p.x+Math.cos(a)*R,y1:p.y+Math.sin(a)*R,t:0,T:0.42});
       }
       A.mortarT();
-      wt.mortar=Math.max(0.9,2.4-0.18*lv)*p.cdMul*(evo?0.6:1);   // чаще
+      wt.mortar=Math.max(0.9,2.4-0.18*lv)*1.25*p.cdMul*(evo?0.6:1); // частота -20% (Заход 6)
     }
   }
   // --- колокол: волна света ---
@@ -2016,7 +2011,7 @@ function fireWeapons(dt){
     if(tgt&&bd<range*range){
       // разворот к ближайшему врагу НЕ мгновенный — макс ~360°/с
       const targetA=Math.atan2(tgt.y-p.y,tgt.x-p.x);
-      const da=((targetA-run.lanternAim+Math.PI*3)%(Math.PI*2))-Math.PI, maxTurn=TAU*dt;
+      const da=((targetA-run.lanternAim+Math.PI*3)%(Math.PI*2))-Math.PI, maxTurn=(spear?TAU:TAU*3)*dt; // конус 1080°/с, луч-синергия 360°/с (Заход 6)
       run.lanternAim = Math.abs(da)<=maxTurn ? targetA : run.lanternAim+Math.sign(da)*maxTurn;
       wt.lantern-=dt;
       if(wt.lantern<=0){
@@ -2066,15 +2061,16 @@ function fireWeapons(dt){
     while(run.swords.length>cnt) run.swords.pop();
     for(let si=0;si<run.swords.length;si++){
       const sw=run.swords[si];
+      if(sw.cd>0) sw.cd-=dt;                       // глоб. кулдаун удара меча (нерф: не косит кучу мгновенно)
       let tgt=null,bd=R*R;
       forNear(p.x,p.y,R+40,e=>{ if(e.dead||e.swT>0) return; const d=dist2(p.x,p.y,e.x,e.y); if(d<bd){bd=d;tgt=e;} });
       if(tgt){
         const dx=tgt.x-sw.x, dy=tgt.y-sw.y, d=Math.sqrt(dx*dx+dy*dy)||1;
         sw.x+=dx/d*spd*dt; sw.y+=dy/d*spd*dt; sw.ang=Math.atan2(dy,dx);
-        if(d<hitR+tgt.r){
+        if(d<hitR+tgt.r&&(sw.cd||0)<=0){
           const ka=Math.atan2(tgt.y-p.y,tgt.x-p.x);
-          damageEnemy(tgt,dmg,'sword',Math.cos(ka)*130,Math.sin(ka)*130);
-          tgt.swT=0.45;                            // краткий иммунитет — меч летит к следующему
+          damageEnemy(tgt,dmg,'sword',Math.cos(ka)*40,Math.sin(ka)*40);  // нокбэк 130→40 (меньше раскидывает)
+          tgt.swT=0.45; sw.cd=0.25;                 // иммунитет цели + кулдаун меча ~0.25с (Заход 6)
         }
       } else {
         const oa=performance.now()*0.0021+si/cnt*TAU;   // нет целей → орбита вокруг героя
@@ -2986,6 +2982,7 @@ function spawnBoss(idx, isFinal){
   return e;
 }
 const WIN_TIME=900; // (устар.) старый таймер финала — не используется при плане C
+const COINK=1.4; // калибровка дропа монет (Заход 6): ~13 дропов/~10 собрано за 2 мин (770 killов); ручка тюнинга
 const BOSS_INTERVAL=180; // план C: интервал появления боссов (ручка темпа)
 function spawnFinalBoss(){ // (устар.) оставлено на всякий случай; директор больше не вызывает
   const e=spawnBoss(BOSSES.length-1, true);
@@ -3226,7 +3223,8 @@ function updateGems(dt){
   const p=run.p;
   const magR=p.magBase*p.magMul;
   for(const g of run.gems){
-    if(state!=='playing') break; // открылся левел-ап в этом кадре → прекращаем сбор; остальное соберётся после выбора (анти-лавина)
+    if(g.dead) continue; // ИСТИННЫЙ ФИКС ЛАВИНЫ: не пере-собирать собранный кристалл (sweep пропускается при левел-апе → dead-кристалл оставался и собирался снова)
+    if(state!=='playing') break; // левел-ап открылся → остальное соберётся после выбора (пейсинг)
     g.t+=dt;
     const d2v=dist2(g.x,g.y,p.x,p.y);
     // магнитятся опыт, золото и сердца; сундук/магнит/бомбу нужно поднять самому
@@ -3393,7 +3391,7 @@ function refreshHud(){
   $('timeText').textContent=fmtTime(run.time);
   $('lvlText').textContent='УР. '+run.level;
   $('killText').textContent='☠ '+run.stats.kills;
-  const est=Math.round((run.stats.kills*0.3+run.time*0.4+run.stats.bosses*60+run.stats.elites*12+run.goldBonus)*run.goldMul);
+  const est=Math.round(run.goldBonus*run.goldMul); // оценка = собранные монеты (Заход 6)
   $('goldText').textContent='◆ +'+est;
   const b=run.bossRef;
   if(b&&!b.dead){
@@ -3700,7 +3698,7 @@ function drawEnemy(e){
       ctx.restore();
     }
     const flashing=e.flash>0;
-    const alt=SPR[e.type+'_a']&&((Math.floor(e.t*7)+e.id)&1); // 2 кадра ходьбы, фаза по id
+    const alt=!meta.settings.perf&&SPR[e.type+'_a']&&((Math.floor(e.t*7)+e.id)&1); // 2 кадра ходьбы; перф-режим = статичный кадр (Заход 7)
     let spr, bossW=null;
     if(e.boss){ spr=SPR['boss_'+e.bkind]||SPR.boss; bossW=SPR['boss_'+e.bkind+'_w']||SPR.boss_w; }
     else if(flashing) spr=(alt&&SPR[e.type+'_wa'])?SPR[e.type+'_wa']:SPR[e.type+'_w'];
@@ -4078,7 +4076,7 @@ const MUSIC={
   vol(){ const s=meta.settings; return clamp(s.master*s.music,0,1); },
   pauseAll(){ for(const k in this.decks) for(const a of this.decks[k].els) a.pause(); if(this.preview) this.preview.pause(); },
   roleNow(){
-    if(run&&(state==='playing'||state==='paused'||state==='levelup')){
+    if(run&&(state==='playing'||state==='paused'||state==='levelup'||(state==='settings'&&settingsFrom==='paused'))){ // настройки из паузы = игровая музыка (Заход 6)
       if(run.bossRef&&!run.bossRef.dead) return run.bossRef.final?'final':(run.bossRef.boss>=3?'tension':'boss');
       return A.intensity>0.55?'intense':'calm';
     }
@@ -4128,7 +4126,7 @@ const MUSIC={
 
 // ============================== MAIN LOOP ==============================
 let lastTS=0;
-const fpsBuf=new Float32Array(90); let fpsI=0;
+const fpsBuf=new Float32Array(90); let fpsI=0; let _fps=60; // _fps — бегущий FPS для адаптивных каппов (Заход 7)
 // ============================== DEV-ПАНЕЛЬ (секретный жест: 5 тапов по версии) ==============================
 let devTimescale=1;
 function toggleDev(on){ const d=$('devPanel'); if(!d) return; if(on){ buildDevPanel(); d.classList.add('show'); } else d.classList.remove('show'); }
@@ -4187,6 +4185,7 @@ function loop(ts){
   let dt=(ts-lastTS)/1000; lastTS=ts;
   if(dt>0.1)dt=0.1;
   fpsBuf[fpsI++%90]=dt;
+  if((fpsI&7)===0){ let _s=0,_c=0; for(const v of fpsBuf){ if(v>0){ _s+=v; _c++; } } _fps=_c&&_s>0?_c/_s:60; } // адаптивный FPS (Заход 7)
   if(hitStop>0) hitStop-=dt;
   if(state==='playing'&&run) update(Math.min(dt,0.05)*(hitStop>0?0.12:1)*devTimescale);
   render();
@@ -4277,7 +4276,7 @@ function startRun(){
 function quitToMenu(){
   if(run){
     const s=run.stats;
-    meta.gold+=Math.max(0,Math.round((s.kills*0.3+run.time*0.4+s.bosses*60+s.elites*12+run.goldBonus)*run.goldMul));
+    meta.gold+=Math.max(0,Math.round(run.goldBonus*run.goldMul)); // золото = ТОЛЬКО собранные монеты (Заход 6)
     saveMeta();
   }
   run=null;
@@ -4491,7 +4490,7 @@ bindToggle('tgDmg','dmgnum');
 bindToggle('tgPerf','perf');
 bindToggle('tgFps','fps');
 $('btnReset').onclick=()=>{ const rb=$('btnReset'); const c=(+rb.dataset.ctr||5)-1;
-  if(c<=0){ meta=defaultMeta(); saveMeta(); syncSettingsUI(); updateMenu(); showBanner('ПРОГРЕСС СБРОШЕН','начни заново'); A.deny(); }
+  if(c<=0){ const _s={...meta.settings}; meta=defaultMeta(); meta.settings=_s; saveMeta(); syncSettingsUI(); updateMenu(); showBanner('ПРОГРЕСС СБРОШЕН','начни заново'); A.deny(); }
   else { rb.dataset.ctr=c; rb.textContent='×'+c; A.click(); } };
 
 // ============================== DEBUG API (для QA) ==============================
