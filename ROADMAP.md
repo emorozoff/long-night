@@ -12,8 +12,8 @@
 «Багровая Орда» и была «про вампиров»; сейчас переименована и переосмыслена.
 
 - **Название:** `LONG NIGHT`
-- **Репозиторий:** `emorozoff/crimson-horde` (слаг ссылки менять не нужно)
-- **Live:** https://emorozoff.github.io/crimson-horde/ (GitHub Pages, деплой из main, ~1 мин)
+- **Репозиторий:** `emorozoff/long-night` (слаг ссылки менять не нужно)
+- **Live:** https://emorozoff.github.io/long-night/ (GitHub Pages, деплой из main, ~1 мин)
 - **Исходник:** `/Users/egor/Desktop/Claude Code/вампир fable/game.html`
 
 ## Договорённости с владельцем
@@ -376,7 +376,7 @@
 
 ## Деплой
 ```
-git clone https://github.com/emorozoff/crimson-horde.git /tmp/crimson-deploy
+git clone https://github.com/emorozoff/long-night.git /tmp/crimson-deploy
 cp game.html /tmp/crimson-deploy/index.html   # + музыка в /tmp/crimson-deploy/music/ когда будет
 cd /tmp/crimson-deploy && git add -A && git commit -m "..." && git push
 ```

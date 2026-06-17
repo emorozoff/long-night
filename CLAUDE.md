@@ -13,7 +13,7 @@
   Музыка — 5 собственных треков владельца в `music/` (`track1..5.mp3`), фон меню `art/menubg.jpg`, иконки PWA — в `icons/`, плюс `manifest.webmanifest` и `sw.js`.
 - **Текущая версия:** 0.59 (константа `VERSION` в game.html). Каждое изменение = бамп версии (договорённость). АКТУАЛЬНЫЙ статус всех заходов/правок — в `ROADMAP.md` → «🗺️ КАРТА ЗАХОДОВ» (это живой леджер; данный файл — сжатая шпаргалка).
 - **⚠️ ДВА агента правят `game.html` ПАРАЛЛЕЛЬНО:** геймплей-агент (этот — логика: оружие/враги/XP/экономика/боссы/музыка/`ETYPES`/поведения) и UI-агент (визуал: арт врагов `ENEMY_MAPS`, спрайты героев `HEROSPR`, меню/экраны/CSS/кнопки). Зоны НЕ пересекать. Мерж: UI-агент вливает `main` в свою ветку → `main` ff. См. память `longnight-agent-zones`.
-- **Live (GitHub Pages):** https://emorozoff.github.io/crimson-horde/ — репо `emorozoff/crimson-horde`.
+- **Live (GitHub Pages):** https://emorozoff.github.io/long-night/ — репо `emorozoff/long-night`.
 - **Исходник на машине:** `/Users/egor/Desktop/Claude Code/вампир fable/` (game.html, ROADMAP.md, CLAUDE.md,
   manifest.webmanifest, sw.js, music/, icons/, REPORT.md — старый отчёт первых циклов).
 
@@ -180,6 +180,6 @@ RENDER → MUSIC → MAIN LOOP → UI/SCREENS → WIRING → DEBUG API → BOOT`
 ## 9. Память / прочее
 - **Файлы памяти агента** (грузятся через `MEMORY.md`): `longnight-cyrillic-pixel-font` (шрифт Tiny5 — кириллица; какие
   шрифты её НЕ содержат), `longnight-xp-rebuild` (как работает опыт после 0.43), `longnight-music-tracks` (настроение 5 треков
-  владельца — я не слышу аудио), `longnight-agent-zones` (разделение зон с UI-агентом). Старый `project-crimson-horde` — про деплой/--mute-audio.
+  владельца — я не слышу аудио), `longnight-agent-zones` (разделение зон с UI-агентом). Старый `project-long-night` — про деплой/--mute-audio.
 - `REPORT.md` — отчёт о самых первых QA-циклах (до нумерации версий), исторический.
 - **Очередь правок и детальный леджер — в `ROADMAP.md`** (КАЖДАЯ предложенная владельцем правка пишется туда ПЕРВЫМ делом, до кода).
