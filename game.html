@@ -242,6 +242,8 @@ h1,h2,.serif{font-family:var(--pix);}
 .mdesc{font-size:12px;color:#a896a2;margin:5px 0;}
 .mlv{font-size:11px;letter-spacing:2px;color:var(--red);}
 .mcost{margin-top:6px;color:var(--gold);font-size:14px;}
+#heroGrid .mcard{text-align:center;}
+.mcard .hico{display:block;margin:0 auto 7px;width:60px;height:72px;image-rendering:pixelated;}
 #expWrap{width:min(640px,90vw);display:flex;flex-direction:column;gap:8px;align-items:center;}
 #expArea{width:100%;height:54px;background:#0d0a10;border:1px solid #33202c;color:#9a8;font-size:11px;
   font-family:monospace;border-radius:6px;padding:6px;resize:none;pointer-events:auto;}
@@ -403,7 +405,7 @@ h1,h2,.serif{font-family:var(--pix);}
    ===================================================================== */
 
 // ============================== UTILS ==============================
-const VERSION='0.42';
+const VERSION='0.43';
 const TAU = Math.PI*2;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const irand=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
@@ -1096,6 +1098,38 @@ buildSprites();
     stats:mico(['.wwwwwwwww.','.w.......w.','.w.kkkkk.w.','.w.......w.','.w.kkkkk.w.','.w.......w.','.w.kkkkk.w.','.w.......w.','.w.kkkkk.w.','.w.......w.','.wwwwwwwww.']),
     best:mico(['...wwwww...','..wwwwwww..','.wwwwwwwww.','.wkk.w.kkw.','.wkk.w.kkw.','.wwwwwwwww.','..wwwwwww..','...wwkww...','..wwwwwww..','..w.w.w.w..','..w.w.w.w..']),
     set:mico(['...w.w.w...','.wwwwwwwww.','.wwwwwwwww.','.ww.www.ww.','.ww.w.w.ww.','w..w.k.w..w','.ww.w.w.ww.','.ww.www.ww.','.wwwwwwwww.','.wwwwwwwww.','...w.w.w...'])
+  };
+}
+// иконки героев — детальные пиксель-портреты (бюсты) для карточек выбора
+{ const HPAL={
+    f:'#e7c79c', F:'#bf966a', e:'#171009',
+    H:'#2e2317', h:'#4c3a23', G:'#586f38', g:'#7c9a4d', w:'#5a3a22', Q:'#caa24a',
+    A:'#7c8698', S:'#b6bfce', B:'#474e5e', y:'#e7c24a', W:'#e9ecf2', r:'#c2233c',
+    P:'#33194f', p:'#583585', u:'#8b5fc2', x:'#e24bff',
+    K:'#161019', k:'#2c1c28', C:'#7c1020', c:'#c2233c', o:'#e7c24a', n:'#ded7cb'
+  };
+  const hico=rows=>px(rows,HPAL,4,'#0b0710');
+  SPR.heroIco={
+    // Охотник — крупный капюшон обрамляет лицо, зелёная накидка, арбалет на груди
+    hunter:hico([
+      '....HHHHH....','...HHHHHHH...','..HHHHHHHHH..','..HHhfffhHH..','..HHfFfFfHH..',
+      '..HHfefefHH..','..HHfFFFfHH..','..HHffFffHH..','...HhfffhH...','...HHfFfHH...',
+      '..GGGGGGGGG..','.GGwwwwwwwGG.','.GGGGgSgGGGG.','.GGGGGSGGGGG.','..GGGGGGGGG..','...GGGGGGG...']),
+    // Паладин — нимб, стальной шлем с забралом, белый таб с красным крестом
+    paladin:hico([
+      '.....yyy.....','...y.....y...','..ASSSSSSSA..','..ASSSSSSSA..','..ASSSSSSSA..',
+      '..AABBBBBAA..','..ASfefefSA..','..ASSSSSSSA..','..AASSSSSAA..','...yWWWWWy...',
+      '..SSWWrWWSS..','.SsSWrrrWSsS.','.SsSWWrWWSsS.','..SWWWrWWWS..','..SWWWWWWWS..','...yWWWWWy...']),
+    // Чернокнижник — тёмно-фиолетовый капюшон, светящиеся глаза, аркан-руны
+    warlock:hico([
+      '....PPPPP....','...PPPPPPP...','..PPpppppPP..','..PpFFFFFpP..','..PpFfFfFpP..',
+      '..PpFxFxFpP..','..PpFFFFFpP..','..PpfFFFfpP..','...PpfFfpP...','....PpFpP....',
+      '...PPpppPP...','..PpppupppP..','.PppuuuuuppP.','.PpuuxuxuupP.','.PppuuuuuppP.','..PPpppppPP..']),
+    // Инквизитор — широкополая шляпа, чёрно-багряный кафтан, белый воротник, золотой крест
+    inquisitor:hico([
+      '....KKKKK....','....KkkkK....','....KkkkK....','..KKKKKKKKK..','.KKKKKKKKKKK.',
+      '...fFfFfFf...','...ffefeff...','...fFFFFFf...','....fFFFf....','...nnnFnnn...',
+      '..CCnnonnCC..','.CcCnooonCcC.','.CcCnnonnCcC.','.CcCCnonCCcC.','..CCCCnCCCC..','..CcCCCCCcC..'])
   };
 }
 // препятствия: редкие твёрдые коллайдеры, детерминированно по миру; тормозят ТОЛЬКО игрока
@@ -3410,7 +3444,8 @@ function buildHeroes(){
     const c=document.createElement('div');
     c.className='mcard'+(sel&&!launching?' herosel':'')+(!owned?' herolock':'');
     const status=launching?(owned?'В БОЙ ▸':'🔒 ◆ '+h.cost):(sel?'✓ ВЫБРАН':owned?'ВЫБРАТЬ':'🔒 ◆ '+h.cost);
-    c.innerHTML='<div class="mname">'+h.name+'</div><div class="mdesc">'+h.desc+'</div><div class="mcost">'+status+'</div>';
+    c.innerHTML='<img class="hico" src="'+sprURL(SPR.heroIco[h.id],'hico_'+h.id)+'" alt="">'+
+      '<div class="mname">'+h.name+'</div><div class="mdesc">'+h.desc+'</div><div class="mcost">'+status+'</div>';
     c.onclick=()=>{
       if(owned){ meta.hero=h.id; saveMeta(); A.buy(); if(launching) setState('pickLoc'); else buildHeroes(); return; }
       if(meta.gold>=h.cost){ meta.gold-=h.cost; meta.heroes[h.id]=true; meta.hero=h.id; saveMeta(); A.buy(); if(launching) setState('pickLoc'); else buildHeroes(); }
