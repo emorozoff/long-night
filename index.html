@@ -95,7 +95,7 @@ h1,h2,.serif{font-family:var(--pix);}
   box-shadow:inset 0 1px 0 rgba(255,255,255,0.12),inset 0 -4px 9px rgba(0,0,0,0.5),inset 0 0 0 1px rgba(0,0,0,0.3),0 4px 0 #0b0c11,0 6px 12px rgba(0,0,0,0.45);}
 .btn.big:hover{border-color:#a23a44;background:linear-gradient(180deg,#4c4f58 0%,#3a3c45 50%,#26282f 100%);
   box-shadow:inset 0 1px 0 rgba(255,255,255,0.14),inset 0 -4px 9px rgba(0,0,0,0.5),inset 0 0 0 1px rgba(0,0,0,0.3),0 0 30px #d4203a44,0 4px 0 #0b0c11,0 6px 12px rgba(0,0,0,0.45);transform:translateY(-2px);}
-.btn.big .ar{color:var(--red);text-shadow:0 0 10px #d4203aaa;}
+.btn.big .ar{color:var(--red);font-size:1.35em;line-height:0;vertical-align:-2px;margin-right:4px;text-shadow:0 0 12px #d4203aaa;}
 .btnrow{display:flex;gap:12px;flex-wrap:wrap;justify-content:center;align-items:flex-end;}
 .btnrow .btn{min-width:150px;text-align:center;}
 .hint{color:var(--dim);font-size:13px;margin-top:10px;}
@@ -121,7 +121,7 @@ h1,h2,.serif{font-family:var(--pix);}
 /* ---------- расширенные настройки ---------- */
 #setBox{display:flex;flex-direction:column;gap:9px;max-height:62vh;overflow-y:auto;padding:4px 8px;align-items:center;}
 .setsec{font-family:var(--pix);letter-spacing:2px;color:var(--red);font-size:24px;margin-top:14px;}
-.setval{width:44px;text-align:right;color:var(--gold);font-size:13px;}
+.setval{width:48px;text-align:right;color:var(--gold);font-size:15px;font-weight:700;}
 .toggle{pointer-events:auto;cursor:pointer;width:58px;height:26px;border-radius:3px;border:2px solid #5a2030;background:#1a0d12;position:relative;transition:.12s;flex:none;image-rendering:pixelated;}
 .toggle::after{content:'';position:absolute;top:2px;left:2px;width:18px;height:18px;border-radius:2px;background:#7a6f75;transition:.12s;}
 .toggle.on{background:#3a1520;border-color:var(--red);}
@@ -153,11 +153,12 @@ h1,h2,.serif{font-family:var(--pix);}
 .ichip span{position:absolute;right:2px;bottom:0;font-size:13px;line-height:1;color:#e7c24a;text-shadow:0 1px 2px #000,0 0 2px #000;font-weight:bold;}
 .cardico{width:46px;height:46px;image-rendering:pixelated;float:right;margin:-2px -2px 0 8px;}
 #bestGrid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:12px;width:min(880px,92vw);max-height:56vh;overflow-y:auto;padding:4px;}
-.bcard{display:flex;flex-direction:column;align-items:center;text-align:center;padding:12px;border:1px solid var(--line);border-radius:8px;background:linear-gradient(180deg,#1c1118,#120a10);}
-.bcard img{width:54px;height:54px;image-rendering:pixelated;margin-bottom:6px;}
-.bcard .bq{width:54px;height:54px;display:flex;align-items:center;justify-content:center;font-size:34px;color:#4a3a45;font-family:var(--pix);margin-bottom:6px;}
-.bcard .bname{font-family:var(--ui);font-weight:700;font-size:16px;color:#fff;}
-.bcard .bdesc{font-size:12px;color:#a896a2;margin-top:4px;line-height:1.4;}
+/* пиксельные карточки бестиария (Заход 8A): резкая рамка, заголовок Tiny5, описание читаемо */
+.bcard{display:flex;flex-direction:column;align-items:center;text-align:center;padding:12px;border:3px solid #5a2030;border-radius:0;background:linear-gradient(180deg,#1c1118,#120a10);box-shadow:inset 0 0 0 1px #2a0c14;image-rendering:pixelated;}
+.bcard img{width:56px;height:56px;image-rendering:pixelated;margin-bottom:6px;}
+.bcard .bq{width:56px;height:56px;display:flex;align-items:center;justify-content:center;font-size:34px;color:#4a3a45;font-family:var(--pix);margin-bottom:6px;}
+.bcard .bname{font-family:var(--pix);font-weight:400;letter-spacing:1px;font-size:17px;color:#fff;}
+.bcard .bdesc{font-family:var(--ui);font-size:12px;color:#a896a2;margin-top:4px;line-height:1.4;}
 .bcard.unseen{opacity:.6;}
 .bcard.unseen .bname{color:#6a5a64;}
 #achList{display:flex;flex-direction:column;gap:5px;width:min(560px,90vw);max-height:30vh;overflow-y:auto;}
@@ -250,7 +251,13 @@ h1,h2,.serif{font-family:var(--pix);}
 
 /* ---------- settings ---------- */
 .setrow{display:flex;align-items:center;gap:16px;width:440px;max-width:86vw;justify-content:space-between;}
-.setrow input[type=range]{width:180px;accent-color:var(--red);pointer-events:auto;cursor:pointer;}
+/* пиксельные слайдеры громкости (Заход 8A): квадратный трек+ползунок, красная заливка слева */
+.setrow input[type=range]{-webkit-appearance:none;appearance:none;width:180px;height:18px;background:transparent;pointer-events:auto;cursor:pointer;}
+.setrow input[type=range]::-webkit-slider-runnable-track{height:12px;background:#1a0c12;border:2px solid #5a2030;overflow:hidden;}
+.setrow input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;appearance:none;width:14px;height:14px;margin-top:-3px;background:var(--red);border:2px solid #2a0c14;box-shadow:-182px 0 0 174px #8c1426;}
+.setrow input[type=range]::-moz-range-track{height:12px;background:#1a0c12;border:2px solid #5a2030;}
+.setrow input[type=range]::-moz-range-progress{height:12px;background:#8c1426;}
+.setrow input[type=range]::-moz-range-thumb{width:14px;height:14px;border-radius:0;background:var(--red);border:2px solid #2a0c14;}
 .setrow label{font-family:var(--pix);font-size:19px;letter-spacing:1px;}
 
 /* ---------- death ---------- */
@@ -296,7 +303,7 @@ body.ingame,body.ingame *{cursor:none!important;}
   <div class="titlewrap"><h1 class="title">LONG NIGHT</h1></div>
   <div class="subtitle">НОЧЬ БУДЕТ ОЧЕНЬ ДОЛГОЙ</div>
   <hr class="divline">
-  <button class="btn big" id="btnStart"><span class="ar">▸</span> НА ОХОТУ</button>
+  <button class="btn big" id="btnStart"><span class="ar">▶</span> НА ОХОТУ</button>
   <div class="btnrow">
     <div class="btncol"><div class="goldrow">◆ <span id="menuGold">0</span></div><button class="btn" id="btnShop"><img class="bico" id="icoShop" alt="">СКЛЕП</button></div>
     <button class="btn" id="btnStats"><img class="bico" id="icoStats" alt="">ЛЕТОПИСЬ</button>
@@ -361,8 +368,6 @@ body.ingame,body.ingame *{cursor:none!important;}
     <div class="setrow"><label>ГРОМКОСТЬ</label><input type="range" id="volMaster" min="0" max="100"><span class="setval" id="valMaster"></span></div>
     <div class="setrow"><label>МУЗЫКА</label><input type="range" id="volMusic" min="0" max="100"><span class="setval" id="valMusic"></span></div>
     <div class="setrow"><label>ЭФФЕКТЫ</label><input type="range" id="volSfx" min="0" max="100"><span class="setval" id="valSfx"></span></div>
-    <div class="setsec">ПРОСЛУШАТЬ МУЗЫКУ</div>
-    <div id="musTest"></div>
     <div class="setsec">ИГРА</div>
     <div class="setrow"><label>ТРЯСКА КАМЕРЫ</label><button class="toggle" id="tgShake"></button></div>
     <div class="setrow"><label>HP-БАР У ГЕРОЯ</label><button class="toggle" id="tgHp"></button></div>
@@ -410,7 +415,7 @@ body.ingame,body.ingame *{cursor:none!important;}
    ===================================================================== */
 
 // ============================== UTILS ==============================
-const VERSION='0.70';
+const VERSION='0.71';
 const TAU = Math.PI*2;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const irand=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
@@ -1229,14 +1234,19 @@ function forObstaclesNear(x,y,margin,fn){
   const c0y=Math.floor((y-margin)/OBST_CELL),c1y=Math.floor((y+margin)/OBST_CELL);
   for(let cy=c0y;cy<=c1y;cy++)for(let cx=c0x;cx<=c1x;cx++){const o=obstacleAt(cx,cy);if(o)fn(o);}
 }
-// кровавые лужи Топи: детерминированы координатами мира
+// лужи уровней: детерминированы координатами мира. Размер/сетка зависят от локации (Заход 8A):
+// grave — «озёра» ×4 радиус на разнесённой сетке (620); swamp/crypt — крупные ×2 (сетка 300).
+function poolCell(){ return run.loc==='grave'?620:300; }
+function poolMul(){ return run.loc==='grave'?4:(run.loc==='swamp'||run.loc==='crypt')?2:1; }
 function poolAt(cx,cy){
   const h=hash2(cx*7+13,cy*11+7);
   if(h>0.3) return null;
-  return {x:cx*300+hash2(cx,cy*3)*220+40, y:cy*300+hash2(cx*5,cy)*220+40, r:60+hash2(cx+1,cy+2)*55};
+  const C=poolCell(), mul=poolMul();
+  return {x:cx*C+hash2(cx,cy*3)*(C-80)+40, y:cy*C+hash2(cx*5,cy)*(C-80)+40, r:(60+hash2(cx+1,cy+2)*55)*mul};
 }
 function inPool(x,y){
-  const cx=Math.floor(x/300), cy=Math.floor(y/300);
+  const C=poolCell();
+  const cx=Math.floor(x/C), cy=Math.floor(y/C);
   for(let j=cy-1;j<=cy+1;j++)for(let i=cx-1;i<=cx+1;i++){
     const p=poolAt(i,j);
     if(p&&dist2(x,y,p.x,p.y)<p.r*p.r) return true;
@@ -1354,7 +1364,7 @@ function newRun(){
     heartMul:1, heartDrop:0,
     weapons:{bolt:0,orbit:0,chain:0,aura:0,scythe:0,mortar:0,bell:0,lantern:0,sword:0},
     wt:{bolt:0.4,chain:0,aura:0,scythe:0.8,mortar:1.2,bell:1.2,lantern:0}, orbA:0, auraR:0,
-    rings:[], lanternAim:0, bladePts:[], wardEvery:6.5, wardCD:6.5, wardReady:false, swords:[], fieldXp:0,
+    rings:[], lanternAim:0, lanternOn:false, bladePts:[], wardEvery:6.5, wardCD:6.5, wardReady:false, swords:[], fieldXp:0,
     taken:{}, leechPool:0,
     rerolls:(mb.rerolls||0)+(m.rerolls||0), banishes:1, banished:{}, banishMode:false, evo:{}, fused:{},
     spawnT:1.4, waveT:55, eliteT:115, bossT:180, bossIdx:0, bossTier:0, bossRef:null,
@@ -2010,9 +2020,10 @@ function fireWeapons(dt){
     let tgt=null,bd=1e9; const range=(150+22*lv)*(evo?1.4:1)*(spear?6:1);
     for(const e of run.en){ if(e.dead) continue; const d=dist2(p.x,p.y,e.x,e.y); if(d<bd){bd=d;tgt=e;} }
     if(tgt&&bd<range*range){
-      // разворот к ближайшему врагу НЕ мгновенный — макс ~360°/с
+      run.lanternOn=true; // есть цель — фонарь горит
+      // разворот к ближайшему врагу НЕ мгновенный
       const targetA=Math.atan2(tgt.y-p.y,tgt.x-p.x);
-      const da=((targetA-run.lanternAim+Math.PI*3)%(Math.PI*2))-Math.PI, maxTurn=(spear?TAU:TAU*3)*dt; // конус 1080°/с, луч-синергия 360°/с (Заход 6)
+      const da=((targetA-run.lanternAim+Math.PI*3)%(Math.PI*2))-Math.PI, maxTurn=(spear?TAU:TAU*(1500/360))*dt; // базовый конус 1500°/с (Заход 8A), луч-синергия 360°/с
       run.lanternAim = Math.abs(da)<=maxTurn ? targetA : run.lanternAim+Math.sign(da)*maxTurn;
       wt.lantern-=dt;
       if(wt.lantern<=0){
@@ -2039,7 +2050,7 @@ function fireWeapons(dt){
           });
         }
       }
-    } else run.lanternAim=run.lanternAim;
+    } else { run.lanternOn=false; } // рядом никого — фонарь гаснет (рендер конуса скрыт)
   }
   // --- Стальная буря (Клинки+Меч): один огромный медленный клинок, сносящий почти всех ---
   if(run.fused.steel){
@@ -2670,7 +2681,7 @@ BOSS_MECH.gravedigger=function(e,dt,dx,dy,d,sf){
     e.rise=[5.2,4.0,3.0][e.phase];
     let risen=0; for(const o of run.en) if(o._risen&&!o.dead) risen++;
     if(risen<150){
-      const n=[5,7,9][e.phase];
+      const n=[8,11,14][e.phase]; // ×1.5 больше поднятых (Заход 8A); опыт = 0 (правило мобов-от-боссов)
       const types=['skeleton','ghoul','zombie'];
       for(let i=0;i<n;i++){
         const a=rand(0,TAU), rr=run.p.r+rand(70,170);
@@ -3119,7 +3130,7 @@ function updatePlayer(dt){
     if(d>0.18){dx=touchPad.vx/d;dy=touchPad.vy/d;}
   }
   if(dx) p.face=dx>0?1:-1;
-  const spd=230*p.spdMul*((run.loc==='swamp'||run.loc==='grave')&&inPool(p.x,p.y)?0.84:1)*Math.max(0.55,(run.flaySlowT>0?0.6:1)*(run.tideSlow?0.55:1));
+  const spd=230*p.spdMul*((run.loc==='grave'&&inPool(p.x,p.y))?0.62:(run.loc==='swamp'&&inPool(p.x,p.y))?0.72:1)*Math.max(0.55,(run.flaySlowT>0?0.6:1)*(run.tideSlow?0.55:1)); // grave топит сильнее, swamp слабее, crypt — лёд не тебя (Заход 8A)
   p.x+=dx*spd*dt; p.y+=dy*spd*dt;
   // коллизия с препятствиями — тормозят ТОЛЬКО игрока (враги/снаряды проходят сквозь)
   forObstaclesNear(p.x,p.y,p.r+OBST_R+6,o=>{
@@ -3228,10 +3239,16 @@ function updateGems(dt){
     if(state!=='playing') break; // левел-ап открылся → остальное соберётся после выбора (пейсинг)
     g.t+=dt;
     const d2v=dist2(g.x,g.y,p.x,p.y);
-    // магнитятся опыт, золото и сердца; сундук/магнит/бомбу нужно поднять самому
-    if((g.kind==='xp'||g.kind==='coin'||g.kind==='heart')&&!g.mag&&d2v<magR*magR){g.mag=true;g.ms=200;}
+    // магнит: опыт/сердца — общий радиус; МОНЕТЫ — свой МАЛЫЙ радиус (вариант C, Заход 8A); сундук/магнит/бомбу поднимаем сами
+    if(!g.mag){
+      if((g.kind==='xp'||g.kind==='heart')&&d2v<magR*magR){ g.mag=true; g.ms=380; }
+      else if(g.kind==='coin'&&d2v<52*52){ g.mag=true; g.ms=80; } // монета цепляется только вблизи (не «ползёт издалека»)
+    }
     if(g.mag){
-      const d=Math.sqrt(d2v)||1, sp=380; // ПОСТОЯННАЯ скорость (без разгона) — далёкий летит долго
+      const d=Math.sqrt(d2v)||1;
+      let sp;
+      if(g.kind==='coin'){ g.ms=Math.min(820,(g.ms||80)+2000*dt); sp=g.ms; } // резкое УСКОРЕНИЕ → «дзынь» в руку
+      else sp=380; // опыт/сердца — ровная скорость
       g.x+=(p.x-g.x)/d*sp*dt;
       g.y+=(p.y-g.y)/d*sp*dt;
     }
@@ -3350,7 +3367,7 @@ function updateZones(dt){
   }
   // пузыри в лужах Топи / Склепа
   if((run.loc==='swamp'||run.loc==='crypt'||run.loc==='grave')&&chance(0.2)&&run.parts.length<560){
-    const cx=Math.floor(p.x/300)+irand(-1,1), cy=Math.floor(p.y/300)+irand(-1,1);
+    const C=poolCell(), cx=Math.floor(p.x/C)+irand(-1,1), cy=Math.floor(p.y/C)+irand(-1,1);
     const pl=poolAt(cx,cy);
     if(pl) run.parts.push({x:pl.x+rand(-pl.r,pl.r)*0.6,y:pl.y+rand(-pl.r,pl.r)*0.5,vx:0,vy:-rand(4,12),life:rand(0.4,0.9),max:0.9,color:(run.loc==='grave'?'#3f7a68':run.loc==='crypt'?'#3a6a9a':'#8a2030'),size:rand(1.5,3)});
   }
@@ -3419,9 +3436,9 @@ function drawGround(px,py){
   if(loc==='swamp'||loc==='crypt'||loc==='grave'){
     const c1=loc==='crypt'?'rgba(38,86,140,0.32)':loc==='grave'?'rgba(26,72,66,0.34)':'rgba(110,22,36,0.32)';
     const c2=loc==='crypt'?'rgba(20,52,92,0.42)':loc==='grave'?'rgba(14,46,44,0.44)':'rgba(70,14,24,0.42)';
-    const cs=300;
-    for(let cy=Math.floor((py-H/2)/cs)-1;cy<=Math.floor((py+H/2)/cs)+1;cy++)
-      for(let cx=Math.floor((px-W/2)/cs)-1;cx<=Math.floor((px+W/2)/cs)+1;cx++){
+    const cs=poolCell(); // сетка луж per-локация (Заход 8A)
+    for(let cy=Math.floor((py-H/2)/cs)-2;cy<=Math.floor((py+H/2)/cs)+2;cy++) // запас 2 ячейки: края крупных озёр grave не «попают» при прокрутке
+      for(let cx=Math.floor((px-W/2)/cs)-2;cx<=Math.floor((px+W/2)/cs)+2;cx++){
         const pl=poolAt(cx,cy); if(!pl) continue;
         const sd=hash2(Math.round(pl.x),Math.round(pl.y));
         const blob=(rm,oy)=>{ ctx.beginPath();
@@ -3506,7 +3523,7 @@ function drawZones(){
     ctx.strokeStyle='rgba(255,255,255,'+(0.95*al).toFixed(2)+')'; ctx.lineWidth=3;
     ctx.beginPath(); ctx.moveTo(b.x,b.y); ctx.lineTo(ex,ey); ctx.stroke();
     ctx.restore();
-  } else if(run.weapons.lantern>0){
+  } else if(run.weapons.lantern>0 && run.lanternOn){ // гаснет, если рядом нет цели (Заход 8A)
     const lv=run.weapons.lantern, evo=run.evo.lantern, range=(150+22*lv)*(evo?1.4:1), half=(evo?Math.PI:0.18+0.08*lv);
     ctx.save(); ctx.globalCompositeOperation='lighter';
     const g2=ctx.createRadialGradient(p.x,p.y,8,p.x,p.y,range);
@@ -4486,20 +4503,13 @@ const MUSIC={
   files:{t1:'music/track1.mp3',t2:'music/track2.mp3',t3:'music/track3.mp3',t4:'music/track4.mp3',t5:'music/track5.mp3'},
   // роль (по состоянию игры) → какой трек: 1=меню, 2=уровни(бодрый), 3=уровни(спокойный), 4=босс, 5=опасность/финал
   roles:{menu:'t1', calm:'t3', intense:'t2', boss:'t4', tension:'t5', final:'t5'},
-  order:['t1','t2','t3','t4','t5'],
-  labels:{t1:'1 · МЕНЮ',t2:'2 · УРОВНИ (бодрый)',t3:'3 · УРОВНИ (спокойный)',t4:'4 · БОСС',t5:'5 · ОПАСНОСТЬ'},
   XF:1.8,                       // секунды кроссфейда (луп-шов и смена роли)
-  decks:{}, started:false, preview:null, previewId:null, probeStatus:{}, onStatus:null, onPrevEnd:null,
+  decks:{}, started:false,
   deck(id){
     let d=this.decks[id]; if(d) return d;
-    const src=this.files[id], self=this;
+    const src=this.files[id];
     const mk=()=>{const a=new Audio();a.src=src;a.preload='auto';a.loop=false;a.volume=0;a._failed=false;a.addEventListener('error',()=>{a._failed=true;});return a;};
     d={id, els:[mk(),mk()], i:0, g:0};
-    // статус загрузки (по первому элементу) — для меню прослушивания
-    const a0=d.els[0];
-    const upd=()=>{ self.probeStatus[id]=a0._failed?'err':(a0.readyState>=3?'ok':'load'); if(self.onStatus) self.onStatus(id); };
-    a0.addEventListener('canplaythrough',upd); a0.addEventListener('loadeddata',upd); a0.addEventListener('error',upd);
-    self.probeStatus[id]='load';
     // подстраховка от тишины: если кроссфейд-шов не сработал — мягко перезапустить активный
     for(const a of d.els) a.addEventListener('ended',()=>{ if(d.g>0.01 && d.els[d.i]===a){ try{a.currentTime=0; a.play().catch(()=>{});}catch(e){} } });
     this.decks[id]=d; return d;
@@ -4508,9 +4518,8 @@ const MUSIC={
     this.deck(this.roles.menu);                                            // меню сразу
     setTimeout(()=>{ this.deck(this.roles.calm); this.deck(this.roles.intense); this.deck(this.roles.boss); },2500); // остальные в фоне
   },
-  loadAll(){ for(const id of this.order) this.deck(id); },                 // догрузить все (для меню прослушивания)
   vol(){ const s=meta.settings; return clamp(s.master*s.music,0,1); },
-  pauseAll(){ for(const k in this.decks) for(const a of this.decks[k].els) a.pause(); if(this.preview) this.preview.pause(); },
+  pauseAll(){ for(const k in this.decks) for(const a of this.decks[k].els) a.pause(); },
   roleNow(){
     if(run&&(state==='playing'||state==='paused'||state==='levelup'||(state==='settings'&&settingsFrom==='paused'))){ // настройки из паузы = игровая музыка (Заход 6)
       if(run.bossRef&&!run.bossRef.dead) return run.bossRef.final?'final':(run.bossRef.boss>=3?'tension':'boss');
@@ -4521,14 +4530,6 @@ const MUSIC={
   tick(dt){
     if(!this.started) return;
     const muted=meta.settings.master<=0.001||document.hidden;
-    // режим прослушивания: геймплейная музыка глушится, ведём только превью
-    if(this.preview){
-      this.preview.volume=muted?0:this.vol();
-      if(muted&&!this.preview.paused) this.preview.pause();
-      else if(!muted&&this.preview.paused) this.preview.play().catch(()=>{});
-      for(const k in this.decks){ const dk=this.decks[k]; dk.g=Math.max(0,dk.g-dt*4); this.applyDeck(dk,dk.g,true); }
-      return;
-    }
     const role=this.roleNow();
     let id=this.roles[role], d=this.deck(id);
     if(d.els[d.i]._failed){ for(const alt of [this.roles.calm,this.roles.menu]){ const dd=this.deck(alt); if(!dd.els[dd.i]._failed){ d=dd; break; } } }
@@ -4553,11 +4554,6 @@ const MUSIC={
       if(k>=0.999){ try{cur.pause(); cur.currentTime=0;}catch(e){} d.i^=1; }
     } else { cur.volume=g; if(!nxt.paused) nxt.pause(); }
   },
-  // ===== меню «прослушать» =====
-  play(id){ this.stopPreview(); this.deck(id); const a=new Audio(); a.src=this.files[id]; a.preload='auto'; a.volume=this.vol();
-    a.addEventListener('ended',()=>{ if(this.preview===a){ this.preview=null; this.previewId=null; if(this.onPrevEnd) this.onPrevEnd(); } });
-    a.play().catch(()=>{}); this.preview=a; this.previewId=id; },
-  stopPreview(){ if(this.preview){ this.preview.pause(); this.preview=null; } this.previewId=null; },
 };
 
 // ============================== MAIN LOOP ==============================
@@ -4672,26 +4668,12 @@ function syncSettingsUI(){
   $('tgPerf').classList.toggle('on',s.perf);
   $('tgFps').classList.toggle('on',s.fps);
 }
-function buildMusicTest(){
-  const box=$('musTest'); if(!box) return;
-  box.innerHTML=MUSIC.order.map(id=>{
-    const st=MUSIC.probeStatus[id]||'load';
-    const col=st==='ok'?'#7ce86a':st==='err'?'#e0506a':'#caa94a';
-    const playing=MUSIC.previewId===id;
-    return '<div class="setrow"><label><span style="color:'+col+'">●</span> '+MUSIC.labels[id]+'</label>'
-      +'<button class="toggle'+(playing?' on':'')+'" data-mt="'+id+'">'+(playing?'■':'▶')+'</button></div>';
-  }).join('');
-}
 function openSettings(from){
   settingsFrom=from;
   syncSettingsUI();
-  MUSIC.loadAll();                 // догрузить все треки, чтобы видеть статус
-  MUSIC.onStatus=()=>{ if(state==='settings') buildMusicTest(); };
-  MUSIC.onPrevEnd=()=>{ if(state==='settings') buildMusicTest(); };
-  buildMusicTest();
   setState('settings');
 }
-function closeSettings(){ MUSIC.stopPreview(); MUSIC.onStatus=null; MUSIC.onPrevEnd=null; setState(settingsFrom==='paused'?'paused':'menu'); }
+function closeSettings(){ setState(settingsFrom==='paused'?'paused':'menu'); }
 function startRun(){
   run=newRun();
   shake=0;
@@ -4877,8 +4859,6 @@ $('btnShopBack').onclick=()=>{A.click();setState('menu');};
 $('btnSaveToggle').onclick=()=>{A.click();$('expWrap').classList.toggle('hidden');
   $('btnSaveToggle').textContent='СОХРАНЕНИЕ / ЗАГРУЗКА '+($('expWrap').classList.contains('hidden')?'⏷':'⏶');};
 $('btnSetBack').onclick=()=>{A.click();closeSettings();};
-$('musTest').addEventListener('click',e=>{ const b=e.target.closest('[data-mt]'); if(!b) return; A.ensure(); A.click();
-  const id=b.dataset.mt; if(MUSIC.previewId===id) MUSIC.stopPreview(); else MUSIC.play(id); buildMusicTest(); });
 $('btnResume').onclick=()=>{A.click();setState('playing');};
 $('btnPauseSettings').onclick=()=>{A.click();openSettings('paused');};
 $('btnQuit').onclick=()=>{A.click();quitToMenu();};
