@@ -410,7 +410,7 @@ body.ingame,body.ingame *{cursor:none!important;}
    ===================================================================== */
 
 // ============================== UTILS ==============================
-const VERSION='0.59';
+const VERSION='0.60';
 const TAU = Math.PI*2;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const irand=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
@@ -640,10 +640,11 @@ const META_DEFS=[
   {id:'rrl', name:'Переброс',       desc:'+1 переброс на левел-апе (старт 0)',   base:80,  mul:2,   max:3},
   {id:'rev', name:'Второе сердце',  desc:'возрождение 1 раз за забег (60% HP)',  base:300, mul:3,   max:2},
 ];
+function _isTouch(){ try{ return !!(navigator.maxTouchPoints>0 || ('ontouchstart' in window)); }catch(e){ return false; } } // мобильный дефолт перф (Заход 7 моб.)
 function defaultMeta(){
   return {gold:0, up:{}, best:null, loc:'grave', hero:'hunter', heroes:{hunter:true}, bestiary:{}, ach:{},
     stats:{runs:0,kills:0,bosses:0,wins:0,playtime:0,bestKills:0,bestCombo:0,locBest:{},heroBest:{},wpnDmg:{}},
-    settings:{master:0.8, music:0.7, sfx:0.9, shake:1, hpbar:true, dmgnum:true, perf:false, fps:false}};
+    settings:{master:0.8, music:0.7, sfx:0.9, shake:1, hpbar:true, dmgnum:true, perf:_isTouch(), fps:false}};
 }
 // «переменная сессии» — основное хранилище; localStorage — необязательный бэкап
 function sanitizeMeta(o){
@@ -1595,13 +1596,13 @@ function pickChoice(i){
 // ============================== FX HELPERS ==============================
 function addText(x,y,str,color,size){
   if(!run) return;
-  if(run.texts.length>90) run.texts.shift();
+  if(run.texts.length>((meta.settings.perf||_lowperf||_fps<40)?36:90)) run.texts.shift(); // меньше цифр на слабых/мобиле
   run.texts.push({x,y,str:''+str,color,size:size||13,life:0.8,max:0.8});
 }
 function addBurst(x,y,color,n,spd,life,size){
   if(!run) return;
-  if(meta.settings.perf||_fps<35) n=Math.ceil(n*0.4); // адаптив: режем партиклы при просадке FPS (Заход 7)
-  const cap=(_fps<32)?180:(meta.settings.perf?300:600);
+  if(meta.settings.perf||_lowperf||_fps<35) n=Math.ceil(n*0.4); // адаптив: режем партиклы (Заход 7 + моб.)
+  const cap=(meta.settings.perf||_lowperf||_fps<32)?180:600;
   for(let i=0;i<n;i++){
     if(run.parts.length>cap) return;
     const a=rand(0,TAU),v=rand(0.3,1)*spd;
@@ -1625,7 +1626,7 @@ function damageEnemy(e,dmg,src,kx,ky){
   let crit=false;
   if(run.p.crit>0&&Math.random()<run.p.crit){dmg*=2;crit=true;}
   dmg=Math.max(1,Math.round(dmg*rand(0.92,1.08)));
-  e.hp-=dmg; e.flash=0.09;
+  e.hp-=dmg; if(src!=='aura'&&src!=='bell') e.flash=0.09; // area-оружие не красит всех в белый (вайт-аут на мобиле)
   run.stats.dmg[src]=(run.stats.dmg[src]||0)+dmg;
   if(run.fused.pyre&&src==='scythe'){ e.burnT=Math.max(e.burnT||0,2.2); e.burnD=Math.max(e.burnD||0,dmg*0.35); } // Крестный огонь: кресты поджигают
   if(run.p.leech>0) run.leechPool+=dmg*0.02*run.p.leech;
@@ -3698,7 +3699,7 @@ function drawEnemy(e){
       ctx.restore();
     }
     const flashing=e.flash>0;
-    const alt=!meta.settings.perf&&SPR[e.type+'_a']&&((Math.floor(e.t*7)+e.id)&1); // 2 кадра ходьбы; перф-режим = статичный кадр (Заход 7)
+    const alt=!(meta.settings.perf||_lowperf)&&SPR[e.type+'_a']&&((Math.floor(e.t*7)+e.id)&1); // 2 кадра ходьбы; перф-режим = статичный кадр (Заход 7)
     let spr, bossW=null;
     if(e.boss){ spr=SPR['boss_'+e.bkind]||SPR.boss; bossW=SPR['boss_'+e.bkind+'_w']||SPR.boss_w; }
     else if(flashing) spr=(alt&&SPR[e.type+'_wa'])?SPR[e.type+'_wa']:SPR[e.type+'_w'];
@@ -4126,7 +4127,7 @@ const MUSIC={
 
 // ============================== MAIN LOOP ==============================
 let lastTS=0;
-const fpsBuf=new Float32Array(90); let fpsI=0; let _fps=60; // _fps — бегущий FPS для адаптивных каппов (Заход 7)
+const fpsBuf=new Float32Array(90); let fpsI=0; let _fps=60; let _lowperf=false; // авто-перф при просадке FPS (моб.) // _fps — бегущий FPS для адаптивных каппов (Заход 7)
 // ============================== DEV-ПАНЕЛЬ (секретный жест: 5 тапов по версии) ==============================
 let devTimescale=1;
 function toggleDev(on){ const d=$('devPanel'); if(!d) return; if(on){ buildDevPanel(); d.classList.add('show'); } else d.classList.remove('show'); }
@@ -4185,7 +4186,7 @@ function loop(ts){
   let dt=(ts-lastTS)/1000; lastTS=ts;
   if(dt>0.1)dt=0.1;
   fpsBuf[fpsI++%90]=dt;
-  if((fpsI&7)===0){ let _s=0,_c=0; for(const v of fpsBuf){ if(v>0){ _s+=v; _c++; } } _fps=_c&&_s>0?_c/_s:60; } // адаптивный FPS (Заход 7)
+  if((fpsI&7)===0){ let _s=0,_c=0; for(const v of fpsBuf){ if(v>0){ _s+=v; _c++; } } _fps=_c&&_s>0?_c/_s:60; _lowperf=_fps<38?true:(_fps>52?false:_lowperf); } // адаптивный FPS + авто-перф (моб.)
   if(hitStop>0) hitStop-=dt;
   if(state==='playing'&&run) update(Math.min(dt,0.05)*(hitStop>0?0.12:1)*devTimescale);
   render();
@@ -4352,7 +4353,7 @@ function buildStats(){
   const hr=HEROES.filter(h=>st.heroBest[h.id]).map(h=>'<div class="k">'+h.name+'</div><div class="v">'+T(st.heroBest[h.id])+'</div>');
   if(hr.length) html+='<div class="sec">РЕКОРД ПО ГЕРОЯМ</div>'+hr.join('');
   const wd=Object.entries(st.wpnDmg).sort((a,b)=>b[1]-a[1]);
-  if(wd.length) html+='<div class="sec">ЛУЧШИЙ УРОН ОРУЖИЕМ</div>'+wd.map(([k,v])=>'<div class="k">'+(WSTAT[k]||k)+'</div><div class="v">'+v+'</div>').join('');
+  if(wd.length) html+='<div class="sec">ЛУЧШИЙ УРОН ОРУЖИЕМ</div>'+wd.map(([k,v])=>'<div class="k">'+(WSTAT[k]||k)+'</div><div class="v">'+fmtNum(v)+'</div>').join('');
   if(!st.runs) html='<div class="k">пока пусто</div><div class="v">сыграй первую ночь</div>';
   $('statsGrid').innerHTML=html;
 }
