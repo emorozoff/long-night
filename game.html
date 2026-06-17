@@ -407,7 +407,7 @@ body.ingame,body.ingame *{cursor:none!important;}
    ===================================================================== */
 
 // ============================== UTILS ==============================
-const VERSION='0.48';
+const VERSION='0.49';
 const TAU = Math.PI*2;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const irand=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
@@ -815,13 +815,13 @@ function px(rows,pal,s,outline){
 }
 function buildSprites(){
   // --- player: охотник на нечисть ---
-  const PP={H:'#1a1422',f:'#e8c6a0',e:'#241018',c:'#8c1426',C:'#c2233c',g:'#e7c24a',b:'#241018'};
+  const PP={H:'#221a2c',h:'#3a2c46',f:'#e8c6a0',F:'#c49a72',e:'#201018',c:'#8c1426',C:'#c2233c',g:'#e7c24a',l:'#5a3a28',b:'#241018'};
   const pbody=[
-    '...HHHHH...','.HHHHHHHHH.','...fffff...','...fefef...','...fffff...',
-    '..cCCCCCc..','..cCCgCCc..','..cCgggCc..','..cCCgCCc..','..cCCCCCc..',
-    '..cc...cc..','..b.....b..','.bb.....bb.'];
+    '...HHHHH...','..HhhhhhH..','..HhFFFhH..','..HhfffhH..','..HhefehH..',
+    '...FfFfF...','.ccCCCCCcc.','.lcCCgCCcl.','.lccCCCccl.','.lccCCCccl.',
+    '..cCCgCCc..','..cCCCCCc..','..b.....b..','.bb.....bb.'];
   SPR.player=px(pbody,PP,3);
-  SPR.player_a=px(pbody.slice(0,10).concat(['..cc...cc..','...b...b...','..bb...bb..']),PP,3);
+  SPR.player_a=px(pbody.slice(0,11).concat(['..cCCCCCc..','...b...b...','..bb...bb..']),PP,3);
   // --- враги: 2 кадра ходьбы (нижние ряды смещаются в противофазе) ---
   const shiftRow=(row,dx)=>{let o='';for(let x=0;x<row.length;x++){const s=x-dx;o+=(s>=0&&s<row.length)?row[s]:'.';}return o;};
   const stepRows=rows=>{const r=rows.slice(),n=r.length;if(n>=2){r[n-1]=shiftRow(r[n-1],1);r[n-2]=shiftRow(r[n-2],-1);}return r;};
