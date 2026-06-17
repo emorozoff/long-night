@@ -408,7 +408,7 @@ body.ingame,body.ingame *{cursor:none!important;}
    ===================================================================== */
 
 // ============================== UTILS ==============================
-const VERSION='0.51';
+const VERSION='0.52';
 const TAU = Math.PI*2;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const irand=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
@@ -845,40 +845,27 @@ function buildSprites(){
   const shiftRow=(row,dx)=>{let o='';for(let x=0;x<row.length;x++){const s=x-dx;o+=(s>=0&&s<row.length)?row[s]:'.';}return o;};
   const stepRows=rows=>{const r=rows.slice(),n=r.length;if(n>=2){r[n-1]=shiftRow(r[n-1],1);r[n-2]=shiftRow(r[n-2],-1);}return r;};
   const ENEMY_MAPS={
-    zombie:{s:3,pal:{a:'#33421f',b:'#5d7a3c',c:'#74934a',e:'#ff2840',m:'#20160c'},rows:[
-      '...bbb...','..bbbbb..','.bbcccbb.','.bcececb.','.bbcccbb.',
-      '.bbmmmbb.','a.bbbbb.a','a.bbbbb.a','.bbb.bbb.','.bb...bb.','.b.....b.']},
-    bat:{s:3,pal:{w:'#4a2f5e',W:'#6a4780',b:'#2a1838',e:'#ffd040'},rows:[
-      'WW.......WW','wWWw.b.wWWw','.wWWWbWWWw.','..wWebeWw..','...wbbbw...','....bbb....']},
-    slime:{s:3,pal:{s:'#7c1f4e',S:'#a93a6e',h:'#d86a9a',e:'#1a0610'},rows:[
-      '...sssss...','.sSSSSSSSs.','.sShSSSSSs.','sSSSSSSSSSs','sSSeSSSeSSs',
-      'sSSSSSSSSSs','.sSSSSSSSs.','.sssssssss.','..sssssss..']},
-    spitter:{s:3,pal:{p:'#4a2a5e',P:'#6e3f8a',m:'#160a1e',g:'#9ef06a'},rows:[
-      '...pppp...','..pPPPPp..','.pPgPPgPp.','.pPPPPPPp.','.pPmmmmPp.',
-      '.pPmggmPp.','.pPmmmmPp.','.pPPPPPPp.','..pPPPPp..','..p.pp.p..','.p......p.']},
-    brute:{s:4,pal:{b:'#6a4d36',c:'#866646',H:'#d8cfc4',e:'#ff2840',m:'#241810',t:'#e8e0d4'},rows:[
-      '.H..........H.','.HH........HH.','..HH......HH..','...bbbbbbbb...','..bbbbbbbbbb..',
-      '..bccccccccb..','..bcceeeeccb..','..bcceeeeccb..','..bccccccccb..','..bmmmmmmmmb..',
-      '..btmmmmmmtb..','..bbccccccbb..','...bbbbbbbb...','...bb....bb...']},
-    warper:{s:3,pal:{d:'#2a1244',p:'#4a2470',P:'#6e3f9e',e:'#e040ff',w:'#1a0a24',h:'#6e3f8a'},rows:[
-      'h.......h','...ppp...','..pPPPp..','.pPPPPPp.','.pPeeePp.',
-      '.pPewePp.','.pPPPPPp.','..pPPPp..','..pPPPp..','...ppp...','...p.p...']},
-    gnat:{s:3,pal:{b:'#3a1230',w:'#7c5a8a',e:'#ff4060'},rows:[
-      'w...w','.bbb.','.beb.','.www.']},
-    ghoul:{s:3,pal:{a:'#2c3a22',b:'#54663a',c:'#7c9050',e:'#ff3838',m:'#181006'},rows:['...bbb...','..bbbbb..','.bbcccbb.','.bcececb.','.bbcccbb.','.bbmmmbb.','a.bbbbb.a','abbbbbbba','.bbb.bbb.','.bb...bb.','.b.....b.']},
-    skeleton:{s:3,pal:{b:'#d8d2c2',k:'#2a241c',e:'#ff5050'},rows:['..bbbbb..','.bbbbbbb.','.bekkkeb.','.bbkkkbb.','.bbbbbbb.','..bbbbb..','...bbb...','.bb.b.bb.','.b.b.b.b.','.b.....b.']},
-    drowned:{s:3,pal:{b:'#274a52',c:'#3a6e74',h:'#5a9098',e:'#a0ffe0',m:'#0c1c20'},rows:['..ccc..','.cbbbc.','cbhbhbc','cbebebc','cbbbbbc','cbmmmbc','cbbbbbc','.cbbbc.','.c...c.']},
-    larva:{s:3,pal:{h:'#d8c0a0',b:'#b89878',e:'#ff6060'},rows:['.hhh.','hbebh','hbbbh','hbbbh','.hhh.']},
-    knight:{s:3,pal:{s:'#7a828e',S:'#4a525e',d:'#2a2e36',e:'#ff4040',g:'#c0c8d2'},rows:['..ggg..','.gSSSg.','.SeSeS.','.SSSSS.','dSSSSSd','dSsssSd','.SsssS.','.SS.SS.','.dd.dd.']},
-    hound:{s:3,pal:{d:'#3a1410',b:'#5e221a',c:'#7e342a',e:'#ff5020',m:'#140605'},rows:['..........','b..bb..b..','bb.bbbb.cc','.bbcccbeb.','.bbcccccb.','dbbbbbbbbd','.b.b..b.b.','.d.d..d.d.']},
-    bomber:{s:3,pal:{r:'#7e2418',R:'#a83422',y:'#ffd040',e:'#ff8020',m:'#1a0805'},rows:['...yyy...','..rRRRr..','.rRRRRRr.','rRReyeRRr','rRRyyyRRr','rRReyeRRr','.rRRRRRr.','..rRRRr..','...r.r...']},
-    archer:{s:3,pal:{b:'#c8c2b0',k:'#241e16',e:'#ff5050',w:'#7a5a30'},rows:['..bbb.w','.bkbkbw','.bbbbww','.bbb.w.','wbbbbw.','wbbbbw.','.b.b.w.','.b.b.w.','.b...b.']},
-    cultist:{s:3,pal:{p:'#3a1c4a',P:'#5e2e74',k:'#16081e',e:'#d040ff',h:'#7a4a9e'},rows:['...ppp...','..pPPPp..','.pPkkkPp.','.pkekekp.','.pPkkkPp.','.pPPPPPp.','pPPPPPPPp','.pPPPPPp.','.pP...Pp.','.pp...pp.']},
-    spider:{s:3,pal:{d:'#241018',b:'#4a1e2e',c:'#6e2e44',e:'#ff3060'},rows:['d.d...d.d','.dd.b.dd.','..bccccb.','.bcececb.','.bcccccb.','..bcccb..','.dd.b.dd.','d.d...d.d']},
-    ogre:{s:4,pal:{b:'#5a6e3a',c:'#7e944e',H:'#d8cfc4',e:'#ff2840',m:'#1c2410'},rows:['.H........H.','.HH......HH.','..bbbbbbbb..','.bbccccccbb.','.bcceeeeccb.','.bcceeeeccb.','.bccccccccb.','.bcmmmmmmcb.','.bbccccccbb.','..bbbbbbbb..','..bb....bb..']},
-    wraith:{s:3,pal:{w:'#3a4a6e',W:'#5a6e9a',c:'#8aa0d0',e:'#80ffff'},rows:['...WWW...','..WcccW..','.WcececW.','.WcccccW.','.WcccccW.','.wWcccWw.','..wWcWw..','...wcw...','..w.w.w..']},
-    harpy:{s:3,pal:{w:'#5a3a2e',W:'#7e5440',b:'#2e1c16',c:'#a87858',e:'#ffd040'},rows:['W.........W','.WW.bbb.WW.','..WbececbW.','...bcccb...','...wbbbw...','....b.b....']},
-    beetle:{s:3,pal:{d:'#1a1408',b:'#3a2e14',c:'#5e4a1e',H:'#8a7030',e:'#ff5030'},rows:['..dddd..','.dHHHHd.','dccccccd','dceccecd','dccccccd','dcddddcd','.d.dd.d.','d.d..d.d']},
+    zombie:{s:3,pal:{a:'#33421f',b:'#44582a',c:'#6e8c44',d:'#92b05e',e:'#ff2840',m:'#17110a'},rows:['...bbb...','..bcccb..','.bcdddcb.','.bcececb.','.bcdddcb.','.bcmmmcb.','a.bcccb.a','a.bcdcb.a','.bbc.cbb.','.bb...bb.','.b.....b.']},
+    bat:{s:3,pal:{w:'#3a2550',W:'#6a4780',v:'#8a64a0',b:'#241636',e:'#ffd040'},rows:['WW.......WW','wWWw.b.wWWw','.wWvWbWvWw.','..wWebeWw..','...wbbbw...','....bbb....']},
+    slime:{s:3,pal:{s:'#6e1a44',S:'#a93a6e',h:'#e07aa6',H:'#f0a8c8',e:'#1a0610'},rows:['...sssss...','.sSSSSSSSs.','.sShHSSSSs.','sSSSSSSSSSs','sSSeSSSeSSs','sSSSSSSSSSs','.sSSSSSSSs.','.sssssssss.','..sssssss..']},
+    spitter:{s:3,pal:{p:'#3a2050',P:'#6e3f8a',q:'#8a5ca8',m:'#160a1e',g:'#9ef06a'},rows:['...pppp...','..pPPPPp..','.pPgPPgPp.','.pPqqqqPp.','.pPmmmmPp.','.pPmggmPp.','.pPmmmmPp.','.pPqPPqPp.','..pPPPPp..','..p.pp.p..','.p......p.']},
+    brute:{s:4,pal:{b:'#6a4d36',c:'#866646',H:'#d8cfc4',e:'#ff2840',m:'#241810',t:'#e8e0d4'},rows:['.H..........H.','.HH........HH.','..HH......HH..','...bbbbbbbb...','..bbbbbbbbbb..','..bccccccccb..','..bcceeeeccb..','..bcceeeeccb..','..bccccccccb..','..bmmmmmmmmb..','..btmmmmmmtb..','..bbccccccbb..','...bbbbbbbb...','...bb....bb...']},
+    warper:{s:3,pal:{d:'#2a1244',p:'#4a2470',P:'#6e3f9e',e:'#e040ff',w:'#1a0a24',h:'#6e3f8a'},rows:['h.......h','...ppp...','..pPPPp..','.pPPPPPp.','.pPeeePp.','.pPewePp.','.pPPPPPp.','..pPPPp..','..pPPPp..','...ppp...','...p.p...']},
+    gnat:{s:3,pal:{b:'#3a1230',w:'#7c5a8a',e:'#ff4060'},rows:['w...w','.bbb.','.beb.','.www.']},
+    ghoul:{s:3,pal:{a:'#2c3a22',b:'#4a5a38',c:'#6e805a',d:'#9aa888',e:'#ff3838',m:'#140e06'},rows:['...bbb...','..bcccb..','.bcdddcb.','.bcececb.','.bcdmdcb.','.bcmmmcb.','a.bcccb.a','abcdddcba','.bbc.cbb.','.bb...bb.','.b.....b.']},
+    skeleton:{s:3,pal:{b:'#e0dac8',c:'#b8b09a',k:'#241e16',e:'#ff5050'},rows:['..bbbbb..','.bbcccbb.','.bekkkeb.','.bbkckbb.','.bbcccbb.','..bbbbb..','.bcb.bcb.','.bcb.bcb.','.bb.b.bb.','.b.....b.']},
+    drowned:{s:3,pal:{b:'#1e3a42',c:'#3a6e74',h:'#5a9098',H:'#86c0c4',e:'#a0ffe0',m:'#0a1418'},rows:['..ccc..','.chhhc.','cbHbHbc','cbebebc','cbbbbbc','cbmmmbc','cbhbhbc','.cbbbc.','.c...c.']},
+    larva:{s:3,pal:{h:'#dcc4a4',b:'#b89878',c:'#9a7858',e:'#ff6060'},rows:['.hhh.','hcech','hbbbh','hcbch','.hbh.']},
+    knight:{s:3,pal:{s:'#8a929e',S:'#5a626e',d:'#2a2e36',e:'#ff4040',g:'#c0c8d2'},rows:['..ggg..','.gsssg.','.SeSeS.','.SdddS.','dSsssSd','dSsssSd','.SsssS.','.SS.SS.','.dd.dd.']},
+    hound:{s:3,pal:{d:'#2e0f0c',b:'#5e221a',c:'#7e342a',h:'#9a4a3a',e:'#ff5020',m:'#120505'},rows:['..........','b..bb..b..','bb.bbbb.cc','.bhcccbeb.','.bbcccccb.','dbbhhhhbbd','.b.b..b.b.','.d.d..d.d.']},
+    bomber:{s:3,pal:{r:'#6e1c12',R:'#a83422',q:'#d05030',y:'#ffd040',e:'#ff9020',m:'#160604'},rows:['...yyy...','..rRqRr..','.rRqqqRr.','rRReyeRRr','rRRyyyRRr','rRReyeRRr','.rRqqqRr.','..rRRRr..','...r.r...']},
+    archer:{s:3,pal:{b:'#d2ccba',c:'#a89e88',k:'#241e16',e:'#ff5050',w:'#7a5a30'},rows:['..bbb.w','.bkbk.w','.bcbcww','.bbb.w.','wbcbcw.','wbcbcw.','.b.b.w.','.b.b.w.','.b...b.']},
+    cultist:{s:3,pal:{p:'#2e1640',P:'#5e2e74',q:'#7a4a9e',k:'#140618',e:'#d040ff'},rows:['...ppp...','..pPPPp..','.pPkkkPp.','.pkekekp.','.pPkkkPp.','.pPqqqPp.','pPqPPPqPp','.pPqqqPp.','.pP...Pp.','.pp...pp.']},
+    spider:{s:3,pal:{d:'#1e0c14',b:'#4a1e2e',c:'#6e2e44',h:'#8e3e58',e:'#ff3060'},rows:['d.d...d.d','.dd.h.dd.','..bccccb.','.bcececb.','.bchhhcb.','..bcccb..','.dd.h.dd.','d.d...d.d']},
+    ogre:{s:4,pal:{b:'#46582c',c:'#7e944e',d:'#9eb468',H:'#d8cfc4',e:'#ff2840',m:'#16200c'},rows:['.H........H.','.HH......HH.','..bbbbbbbb..','.bbddddddbb.','.bcceeeeccb.','.bcceeeeccb.','.bccccccccb.','.bcmmmmmmcb.','.bbddddddbb.','..bbbbbbbb..','..bb....bb..']},
+    wraith:{s:3,pal:{w:'#2e3a5e',W:'#5a6e9a',c:'#8aa0d0',H:'#bcd0f0',e:'#80ffff'},rows:['...WWW...','..WcccW..','.WcececW.','.WcHHHcW.','.WcccccW.','.wWcccWw.','..wWcWw..','...wcw...','..w.w.w..']},
+    harpy:{s:3,pal:{w:'#4a2e24',W:'#7e5440',v:'#a87858',b:'#241612',c:'#9a6a48',e:'#ffd040'},rows:['W.........W','.Wv.bbb.vW.','..WbececbW.','...bcccb...','...wbvbw...','....b.b....']},
+    beetle:{s:3,pal:{d:'#16100a',b:'#3a2e14',c:'#5e4a1e',H:'#9a7c34',h:'#c0a050',e:'#ff5030'},rows:['..dddd..','.dHHHHd.','dchhhhcd','dceccecd','dchhhhcd','dcddddcd','.d.dd.d.','d.d..d.d']},
   };
   for(const id in ENEMY_MAPS){
     const d=ENEMY_MAPS[id];
