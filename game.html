@@ -403,7 +403,7 @@ h1,h2,.serif{font-family:var(--pix);}
    ===================================================================== */
 
 // ============================== UTILS ==============================
-const VERSION='0.42';
+const VERSION='0.43';
 const TAU = Math.PI*2;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const irand=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
@@ -884,6 +884,7 @@ function buildSprites(){
     pact:ico(['.PPPPPPP...','.PpppppP...','.Pp...pP...','.Pp.k.pP...','.Pp...pP...','.PpppppP...','.PPPPPPP...']),
     hunger:ico(['.bbbbbbb...','.bB.g.Bb...','.bBgggBb...','.bB.g.Bb...','.bBBBBBb...','.bbbbbbb...']),
     alch:ico(['....ss.....','....cc.....','...cccc....','..cmmmmc...','..cmmmmc...','..cmmmmc...','...cmmc....']),
+    ward:ico(['.ggggggggg.','gcccccccccg','gcccclccccg','gclllllllcg','gcccclccccg','gcccccccccg','.gcccccccg.','..gcccccg..','...gcccg...','....ggg....']),
     bell:ico(['.....gg......','.....gg......','....lgggg....','...lggggGg...','..lgggggGGg..','.lggggggGGGg.','.ggggggggggg.','.ggggggggggg.','.....GG......']),
     lantern:ico(['.....nn......','....nnnn.....','...nSWWSn....','..nSWyyWSn...','..nSWyyWSn...','..nSWyyWSn...','...nSWWSn....','....nnnn.....']),
     syn:ico(['.....g.....','..g..g..g..','...ggggg...','..ggg.ggg..','...gg.gg...','..g.....g..']),
@@ -1208,7 +1209,7 @@ function newRun(){
     heartMul:1, heartDrop:0,
     weapons:{bolt:0,orbit:0,chain:0,aura:0,scythe:0,mortar:0,bell:0,lantern:0,sword:0},
     wt:{bolt:0.4,chain:0,aura:0,scythe:0.8,mortar:1.2,bell:1.2,lantern:0}, orbA:0, auraR:0,
-    rings:[], lanternAim:0, bladePts:[], wardEvery:6.5, wardCD:6.5, wardReady:false, swords:[],
+    rings:[], lanternAim:0, bladePts:[], wardEvery:6.5, wardCD:6.5, wardReady:false, swords:[], fieldXp:0,
     taken:{}, leechPool:0,
     rerolls:(mb.rerolls||0)+(m.rerolls||0), banishes:1, banished:{}, banishMode:false, evo:{}, fused:{},
     spawnT:1.4, waveT:55, eliteT:115, bossT:180, bossIdx:0, bossTier:0, bossRef:null,
@@ -1669,35 +1670,22 @@ function gameOver(){
 window.__xplog=[]; window.__xpLogOn=false;
 function xplog(src,fn){ if(!window.__xpLogOn||!run) return; const e=Object.assign({t:Math.round(run.time*10)/10,src,lvl:run.level},fn()); window.__xplog.push(e); if(window.__xplog.length>250) window.__xplog.shift(); }
 function fieldXp(){ let s=0; for(const g of run.gems) if(g.kind==='xp') s+=g.v; return s; }
+// ЛИМИТ ПОЛЯ ≈ 3 уровня от ТЕКУЩЕГО (в «сырых» единицах кристаллов; xpMul применяется при подборе).
+// Поле не может накопить больше → магнит физически не принесёт «лавину», максимум ~3 карточки, и то растянуто.
+function xpFieldCap(){ const L=run.level; return (xpNeeded(L)+xpNeeded(L+1)+xpNeeded(L+2))/Math.max(0.5,run.xpMul); }
 function gemDrop(x,y,val){
-  // ЧЕСТНАЯ ЦЕННОСТЬ ОПЫТА: множитель времени ЗАПЕКАЕМ В МОМЕНТ ДРОПА (а не при подборе).
-  // Иначе старый кристалл, собранный магнитом позже, пересчитывается по поздней ставке = инфляция «лавины».
-  // Кристалл теперь стоит ровно столько, сколько заработано в момент убийства.
-  const rawVal=val;
-  val=Math.max(1,Math.round(val*(1+run.time/60*0.12)));
-  const baked=val;
-  // ПОЛЕ НЕ КОПИТ БЕСКОНЕЧНО: число xp-кристаллов ограничено, ценность каждого — с потолком.
-  const CAP=100, MAXGEMS=40;
-  let xpCount=0, best=null, bd=170*170;
-  for(const g of run.gems){
-    if(g.kind!=='xp') continue;
-    xpCount++;
-    if(g.v<CAP){ const d=dist2(x,y,g.x,g.y); if(d<bd){bd=d;best=g;} }
-  }
-  if(xpCount>=MAXGEMS){
-    // поле насыщено: сливаем в ближайший недозаполненный (с потолком)
-    if(best) best.v=Math.min(CAP, best.v+val);
-    xplog('gemDrop',()=>({raw:rawVal,xp:baked,merged:1,field:fieldXp()}));
+  if(val<=0||!run) return;
+  // ценность кристалла фиксируется ПРИ ДРОПЕ (множитель времени запечён, честно, без поздней инфляции)
+  const value=Math.max(1,Math.round(val*(1+run.time/60*0.12)));
+  // считаем число xp-кристаллов (перф-страховка) — run.fieldXp ведём инкрементально
+  let xpCount=0; for(const g of run.gems) if(g.kind==='xp') xpCount++;
+  if(run.fieldXp+value>xpFieldCap() || xpCount>=300){ // поле полно на ~3 ур. (или перф-кап) — излишек теряется
+    xplog('gemDrop',()=>({skip:1,field:Math.round(run.fieldXp),cap:Math.round(xpFieldCap())}));
     return;
   }
-  const denoms=[100,50,20,5,1];
-  for(const d of denoms){
-    while(val>=d){
-      val-=d;
-      run.gems.push({x:x+rand(-14,14),y:y+rand(-14,14),v:d,kind:'xp',mag:false,vx:0,vy:0,t:rand(0,TAU)});
-    }
-  }
-  xplog('gemDrop',()=>({raw:rawVal,xp:baked,field:fieldXp()}));
+  run.fieldXp+=value;
+  run.gems.push({x:x+rand(-12,12),y:y+rand(-12,12),v:value,kind:'xp',mag:false,vx:0,vy:0,t:rand(0,TAU)});
+  xplog('gemDrop',()=>({xp:value,field:Math.round(run.fieldXp),cap:Math.round(xpFieldCap())}));
 }
 function addXP(v){
   v=Math.max(1,Math.round(v*run.xpMul));
@@ -1899,8 +1887,8 @@ function fireWeapons(dt){
   if(wl.sword>0&&!run.fused.steel){
     const lv=wl.sword, evo=run.evo.sword;
     const cnt=1+(lv>=3?1:0)+(evo?2:0);            // 1 → 2 на lv3 → +2 эво
-    const R=150+18*lv, spd=340+28*lv;             // радиус действия и скорость
-    const dmg=(20+10*lv)*p.dmgMul*(evo?1.5:1), hitR=evo?24:18;
+    const R=150+18*lv, spd=170+14*lv;             // радиус действия и скорость (скорость ×0.5)
+    const dmg=(10+5*lv)*p.dmgMul*(evo?1.5:1), hitR=evo?24:18; // урон ×0.5
     while(run.swords.length<cnt) run.swords.push({x:p.x,y:p.y,ang:0});
     while(run.swords.length>cnt) run.swords.pop();
     for(let si=0;si<run.swords.length;si++){
@@ -2465,15 +2453,14 @@ function updateGems(dt){
     // магнитятся опыт, золото и сердца; сундук/магнит/бомбу нужно поднять самому
     if((g.kind==='xp'||g.kind==='coin'||g.kind==='heart')&&!g.mag&&d2v<magR*magR){g.mag=true;g.ms=200;}
     if(g.mag){
-      const d=Math.sqrt(d2v)||1;
-      g.ms=Math.min(860,g.ms+1500*dt);
-      g.x+=(p.x-g.x)/d*g.ms*dt;
-      g.y+=(p.y-g.y)/d*g.ms*dt;
+      const d=Math.sqrt(d2v)||1, sp=190; // ПОСТОЯННАЯ скорость ≈ снаряд врага (без разгона) — далёкий летит долго
+      g.x+=(p.x-g.x)/d*sp*dt;
+      g.y+=(p.y-g.y)/d*sp*dt;
     }
     if(g.kind==='xp'){
-      if(d2v<26*26){
-        g.dead=true; run.stats.gems++;
-        addXP(g.v); // множитель времени уже запечён в g.v при дропе (честная ценность)
+      if(d2v<24*24){
+        g.dead=true; run.stats.gems++; run.fieldXp=Math.max(0,run.fieldXp-g.v);
+        addXP(g.v); // ценность запечена при дропе; здесь применяется xpMul
         addBurst(g.x,g.y,g.v>=20?'#ff7a92':'#7ad4ff',4,90,0.22,1.8);
         A.pickup();
       }
@@ -2492,7 +2479,7 @@ function updateGems(dt){
         addBurst(g.x,g.y,'#e7c24a',5,90,0.3,2);
       } else if(g.kind==='magnet'){
         let _c=0,_s=0;
-        for(const o of run.gems){ if(o.kind==='xp'||o.kind==='coin'){ if(o.kind==='xp'){_c++;_s+=o.v;} o.mag=true;o.ms=Math.max(o.ms||0,320);} }
+        for(const o of run.gems){ if(o.kind==='xp'||o.kind==='coin'){ if(o.kind==='xp'){_c++;_s+=o.v;} o.mag=true;} }
         xplog('magnet',()=>({swept:_c,xp:_s}));
         A.chestS();
         addText(p.x,p.y-24,'СБОР!','#7ad4ff',18);
