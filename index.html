@@ -314,7 +314,7 @@ body.ingame.idle,body.ingame.idle *{cursor:none!important;} /* курсор пр
   #deathGrid{font-size:13px;gap:4px 16px;}
   .deathtitle{font-size:38px;}
   #shopGrid{max-height:38vh;}
-  .mcard .hico{width:44px;height:54px;}        /* иконки выбора героя меньше */
+  .mcard .hico{width:22px;height:27px;}        /* иконки выбора героя ещё в 2 раза меньше */
   .title{font-size:min(60px,12vw);letter-spacing:3px;text-indent:3px;text-align:center;} /* заголовок ровно по центру */
   .titlewrap{display:block;text-align:center;}
   .subtitle{font-size:16px;}
@@ -464,7 +464,7 @@ body.ingame.idle,body.ingame.idle *{cursor:none!important;} /* курсор пр
    ===================================================================== */
 
 // ============================== UTILS ==============================
-const VERSION='0.77';
+const VERSION='0.78';
 const TAU = Math.PI*2;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const irand=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
@@ -1467,7 +1467,7 @@ const UPGRADES=[
   {id:'haste', kind:'p', name:'Песочные часы', max:5, desc:()=>'-8% перезарядка оружия', apply:r=>{r.p.cdMul*=0.92;}},
   {id:'crit', kind:'p', name:'Серебряные пули', max:4, desc:()=>'+10% шанс крита (двойной урон)', apply:r=>{r.p.crit+=0.10;}},
   {id:'armor', kind:'p', name:'Кираса', max:4, desc:()=>'-2 урона от каждого удара', apply:r=>{r.p.armor+=2;}},
-  {id:'leech', kind:'p', name:'Чаша Грааля', max:3, desc:()=>'2% нанесённого урона лечит тебя', apply:r=>{r.p.leech+=1;}},
+  {id:'leech', kind:'p', name:'Чаша Грааля', max:3, desc:()=>'3% нанесённого урона лечит тебя', apply:r=>{r.p.leech+=1;}},
   {id:'pact', kind:'p', name:'Запретный гримуар', max:2, desc:()=>'+25% урона, но −15 макс. HP', apply:r=>{r.p.dmgMul+=0.25;r.p.maxhp=Math.max(40,r.p.maxhp-15);r.p.hp=Math.min(r.p.hp,r.p.maxhp);}},
   {id:'hunger', kind:'p', name:'Библия', max:3, desc:()=>'+25% опыта', apply:r=>{r.xpMul+=0.25;}},
   {id:'alch', kind:'p', name:'Целебный эликсир', max:2, desc:()=>'сердца лечат на +25 сильнее и выпадают чаще', apply:r=>{r.heartMul+=1;r.heartDrop+=0.004;}},
@@ -1714,7 +1714,7 @@ function damageEnemy(e,dmg,src,kx,ky){
   e.hp-=dmg; if(src!=='aura'&&src!=='bell') e.flash=0.09; // area-оружие не красит всех в белый (вайт-аут на мобиле)
   run.stats.dmg[src]=(run.stats.dmg[src]||0)+dmg;
   if(run.fused.pyre&&src==='scythe'){ e.burnT=Math.max(e.burnT||0,2.2); e.burnD=Math.max(e.burnD||0,dmg*0.35); } // Крестный огонь: кресты поджигают
-  if(run.p.leech>0) run.leechPool+=dmg*0.02*run.p.leech;
+  if(run.p.leech>0) run.leechPool+=dmg*0.03*run.p.leech;
   if(kx&&!e.boss&&!e.elite&&e.behav!=='tank'){e.kx+=kx;e.ky+=ky;}
   if(meta.settings.dmgnum&&(src!=='aura'||chance(0.3))) addText(e.x+rand(-8,8),e.y-e.r-6,dmg,crit?'#ffb938':'#fff',crit?22:15);
   if(src!=='lantern') A.hitE(); // фонарь жжёт светом — без ритмичного звука удара
@@ -1813,6 +1813,7 @@ function winGame(){
 // Густоту спавна тут НЕ трогаем (она в diffNow и так очень плотная — по просьбе владельца).
 const DIFFICULTY={
   mul: 1.2,                                  // общий множитель сложности (+20%)
+  enemyHp: 0.5,                              // глобальный множитель HP ВСЕХ врагов (баланс: ÷2)
   hp:  m => 1 + 0.55*m + 0.17*m*m,           // кривая HP врага по времени
   dmg: m => 1 + 0.22*m,                      // кривая урона врага по времени
   spd: m => 1 + Math.min(0.4, m*0.045),      // кривая скорости врага (mul НЕ применяется — игра и так ускорена)
@@ -1825,7 +1826,7 @@ function spawnEnemy(type,x,y,o={}){
   const dmgMul=o.noScale?1:DIFFICULTY.dmg(m)*DIFFICULTY.mul;
   const e={
     id:eid++, type, behav:b.behav||'chase', x, y, r:b.r,
-    hp:Math.round(b.hp*hpMul), maxhp:Math.round(b.hp*hpMul),
+    hp:Math.round(b.hp*hpMul*DIFFICULTY.enemyHp), maxhp:Math.round(b.hp*hpMul*DIFFICULTY.enemyHp),
     spd:b.spd*(o.noScale?1:DIFFICULTY.spd(m))*rand(0.9,1.1),
     dmg:b.dmg*dmgMul,
     xp:Math.max(1,Math.round(b.xp*(1+m*0.15))),
@@ -3382,7 +3383,7 @@ function updatePlayer(dt){
     if(d>0.18){dx=touchPad.vx/d;dy=touchPad.vy/d;}
   }
   if(dx) p.face=dx>0?1:-1;
-  const spd=230*p.spdMul*((run.loc==='grave'&&inPool(p.x,p.y))?0.62:(run.loc==='swamp'&&inPool(p.x,p.y))?0.72:1)*Math.max(0.55,(run.flaySlowT>0?0.6:1)*(run.tideSlow?0.55:1)); // grave топит сильнее, swamp слабее, crypt — лёд не тебя (Заход 8A)
+  const spd=161*p.spdMul*((run.loc==='grave'&&inPool(p.x,p.y))?0.62:(run.loc==='swamp'&&inPool(p.x,p.y))?0.72:1)*Math.max(0.55,(run.flaySlowT>0?0.6:1)*(run.tideSlow?0.55:1)); // база 161 (−30% от 230, баланс); grave топит сильнее, swamp слабее, crypt — лёд не тебя
   p.x+=dx*spd*dt; p.y+=dy*spd*dt;
   // коллизия с препятствиями — тормозят ТОЛЬКО игрока (враги/снаряды проходят сквозь)
   forObstaclesNear(p.x,p.y,p.r+OBST_R+6,o=>{
