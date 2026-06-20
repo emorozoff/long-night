@@ -313,7 +313,15 @@ body.ingame.idle,body.ingame.idle *{cursor:none!important;} /* курсор пр
   .btn.big{font-size:20px;padding:14px 44px;}
   #deathGrid{font-size:13px;gap:4px 16px;}
   .deathtitle{font-size:38px;}
-  #shopGrid{max-height:38vh;}
+  /* СКЛЕП: ОДИН скролл на всё окно — секции развёрнуты, без внутренних скроллов; перма-карточки компактные квадратные (как герои) */
+  #scrShop{justify-content:flex-start;}
+  #shopGrid{grid-template-columns:repeat(2,1fr);gap:8px;max-height:none;overflow:visible;}
+  #shopWGrid{max-height:none;overflow:visible;}
+  #shopGrid .mcard{padding:12px 9px;min-height:150px;display:flex;flex-direction:column;justify-content:center;text-align:center;}
+  #shopGrid .mname{font-size:15px;}
+  #shopGrid .mdesc{font-size:11px;margin:5px 0;line-height:1.35;}
+  #shopGrid .mlv{font-size:10px;letter-spacing:1.5px;}
+  #shopGrid .mcost{font-size:13px;margin-top:5px;}
   /* выбор героя на мобиле: компактные карточки в 2 колонки (≈квадратные) + БОЛЬШЕ иллюстрации */
   #heroGrid{grid-template-columns:repeat(2,1fr);gap:8px;max-height:66vh;}
   #heroGrid .mcard{padding:10px 8px;border-radius:10px;}
@@ -470,7 +478,7 @@ body.ingame.idle,body.ingame.idle *{cursor:none!important;} /* курсор пр
    ===================================================================== */
 
 // ============================== UTILS ==============================
-const VERSION='0.86';
+const VERSION='0.87';
 const TAU = Math.PI*2;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const irand=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
