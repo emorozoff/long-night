@@ -479,7 +479,7 @@ body.ingame.idle,body.ingame.idle *{cursor:none!important;} /* курсор пр
    ===================================================================== */
 
 // ============================== UTILS ==============================
-const VERSION='1.0';
+const VERSION='1.01';
 const TAU = Math.PI*2;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const irand=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
@@ -551,7 +551,7 @@ const A={
   applyVol(){
     if(!this.ctx) return; const s=meta.settings;
     this.master.gain.value=s.master;
-    this.musG.gain.value=s.music*0.5*(state==='playing'?1:0.45);
+    this.musG.gain.value=s.music; // музыка теперь идёт через musG → громкость музыки = этот gain (работает на iOS) — Заход 35
     this.sfxG.gain.value=s.sfx;
     // тройная защита от «звука из ниоткуда»: gain=0 + физический разрыв цепи + остановка потока
     const off=s.master<=0.001;
@@ -4862,7 +4862,10 @@ const MUSIC={
   deck(id){
     let d=this.decks[id]; if(d) return d;
     const src=this.files[id];
-    const mk=()=>{const a=new Audio();a.src=src;a.preload='auto';a.loop=false;a.volume=0;a._failed=false;a.addEventListener('error',()=>{a._failed=true;});return a;};
+    const mk=()=>{const a=new Audio();a.src=src;a.preload='auto';a.loop=false;a.volume=0;a._failed=false;a.addEventListener('error',()=>{a._failed=true;});
+      // маршрут через Web Audio: громкостью рулят gain-узлы (musG/master), а НЕ audio.volume → работает на iOS (Заход 35)
+      if(A.ctx){ try{ a._src=A.ctx.createMediaElementSource(a); a._g=A.ctx.createGain(); a._g.gain.value=0; a._src.connect(a._g); a._g.connect(A.musG); a.volume=1; }catch(e){ a._g=null; } }
+      return a;};
     d={id, els:[mk(),mk()], i:0, g:0};
     // подстраховка от тишины: если кроссфейд-шов не сработал — мягко перезапустить активный
     for(const a of d.els) a.addEventListener('ended',()=>{ if(d.g>0.01 && d.els[d.i]===a){ try{a.currentTime=0; a.play().catch(()=>{});}catch(e){} } });
@@ -4887,26 +4890,27 @@ const MUSIC={
     const role=this.roleNow();
     let id=this.roles[role], d=this.deck(id);
     if(d.els[d.i]._failed){ for(const alt of [this.roles.calm,this.roles.menu]){ const dd=this.deck(alt); if(!dd.els[dd.i]._failed){ d=dd; break; } } }
-    const V=muted?0:this.vol();                            // громкость мастера — применяется МГНОВЕННО (без задержки) — Заход 31
     for(const k in this.decks){
       const dk=this.decks[k];
-      const goal=(dk===d)?1:0;                             // dk.g теперь чистый ВЕС деки (кроссфейд ролей) 0..1, БЕЗ громкости
-      dk.g=clamp(dk.g+(goal-dk.g)*Math.min(1,dt*4),0,1);   // быстрее смена роли (выход в меню): 2.2→4
-      this.applyDeck(dk,dk.g*V,muted);                     // итоговая громкость = вес × мастер → ползунок/мьют срабатывают сразу
+      const goal=(dk===d)?1:0;                             // dk.g — чистый ВЕС деки (кроссфейд ролей) 0..1
+      dk.g=clamp(dk.g+(goal-dk.g)*Math.min(1,dt*4),0,1);   // быстрая смена роли (выход в меню)
+      this.applyDeck(dk,dk.g,muted);                       // громкостью рулят gain-узлы (musG=музыка, master=громкость) → ползунки работают на iOS (Заход 35)
     }
   },
   // одна дека: внешняя громкость g + внутренний бесшовный кроссфейд-луп (2 элемента)
-  applyDeck(d,g,muted){
+  applyDeck(d,w,muted){
     const cur=d.els[d.i], nxt=d.els[d.i^1];
-    if(g<=0.0015){ cur.volume=0; nxt.volume=0; if(!cur.paused) cur.pause(); if(!nxt.paused) nxt.pause(); return; }
+    const mv=this.vol(); // master*music — только для fallback без Web Audio
+    const sv=(a,v)=>{ if(a._g){ a.volume=1; a._g.gain.value=clamp(v,0,1); } else { a.volume=clamp(v*mv,0,1); } }; // routed → gain-узел (iOS-OK); иначе audio.volume
+    if(muted || w<=0.0015){ sv(cur,0); sv(nxt,0); if(!cur.paused) cur.pause(); if(!nxt.paused) nxt.pause(); return; }
     if(cur.paused) cur.play().catch(()=>{});
     const XF=this.XF, dur=cur.duration||0;
     if(dur>XF+0.6 && cur.currentTime>=dur-XF){           // шов лупа: завести второй элемент с нуля и перетечь
       if(nxt.paused){ try{nxt.currentTime=0;}catch(e){} nxt.play().catch(()=>{}); }
       const k=clamp((cur.currentTime-(dur-XF))/XF,0,1);
-      cur.volume=g*(1-k); nxt.volume=g*k;
+      sv(cur, w*(1-k)); sv(nxt, w*k);
       if(k>=0.999){ try{cur.pause(); cur.currentTime=0;}catch(e){} d.i^=1; }
-    } else { cur.volume=g; if(!nxt.paused) nxt.pause(); }
+    } else { sv(cur, w); if(!nxt.paused) nxt.pause(); }
   },
 };
 

@@ -507,6 +507,12 @@ menu/shop/settings/playing/paused/levelup/dead.
 - **0.29 «Орда гуще»:** выбранные владельцем новые враги (до 20+ типов).
 
 ## Журнал версий
+### 1.01 — Заход 35: фикс громкости музыки на iOS (Web Audio маршрутизация)
+- Причина: музыка играла через сырые `<audio>` с `.volume`, а **iOS Safari игнорирует `audio.volume`** (громкость только аппаратная) → на iPhone ползунки «громкость»/«музыка» не регулировали музыку (только вкл/выкл через pause). SFX работали (они через Web Audio gain).
+- Фикс: каждый `<audio>` маршрутизируется через Web Audio — `createMediaElementSource → per-el gain → A.musG → master → comp → destination`. Громкостью рулят gain-узлы: `musG.gain=s.music` (ползунок музыки), `master.gain=s.master` (ползунок громкости) — оба работают на iOS. `applyDeck` ставит per-el gain (вес деки/кроссфейд), а не `audio.volume`; `tick` шлёт вес деки (не вес×громкость). Fallback на `audio.volume` если маршрут не создался.
+- `musG.gain` упрощён `s.music*0.5*sf → s.music` (старый множитель был для отключённого синта). Мьют (master=0 или document.hidden) → pause.
+- Проверено в превью: el_routed=true, audio.volume=1, musG follows music (1→0.3→0.6), master follows master (→0.5), активный элемент gain=вес деки. ⚠️ Реальную слышимость headless не проверить (автоплей) — нужен тест на iPhone. sw CACHE→1.01.
+
 ### 1.0 — Заход 34: все боссы кроме Матери роя −30% (HP/урон/темп атак)
 - `spawnBoss`: `bw=(kind==='matron')?1:0.7` множит HP и урон; сохраняется `e.atkSlow=bw`.
 - `bossUpdate`: `dt*=(e.atkSlow||1)` перед вызовом механики → у не-matron боссов ВСЕ таймеры атак/действий (и движение) идут на 30% медленнее. Матерь роя — без изменений (atkSlow=1).
