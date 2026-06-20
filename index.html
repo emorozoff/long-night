@@ -464,7 +464,7 @@ body.ingame.idle,body.ingame.idle *{cursor:none!important;} /* курсор пр
    ===================================================================== */
 
 // ============================== UTILS ==============================
-const VERSION='0.84';
+const VERSION='0.85';
 const TAU = Math.PI*2;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const irand=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
@@ -698,7 +698,7 @@ function _isTouch(){ try{ return !!(navigator.maxTouchPoints>0 || ('ontouchstart
 const MOBILE=_isTouch();                 // кэш: мобильное устройство (Заход 10 — зум/меньше UI/монеты)
 const ZOOM=MOBILE?0.78:1;                // зум-аут камеры на мобиле (видно больше поля)
 function defaultMeta(){
-  return {gold:0, up:{}, wcrypt:{}, best:null, loc:'grave', hero:'hunter', heroes:{hunter:true}, bestiary:{}, ach:{},
+  return {gold:0, up:{}, wcrypt:{}, best:null, loc:'grave', hero:'hunter', heroes:{hunter:true}, bestiary:{}, ach:{}, locWon:{},
     stats:{runs:0,kills:0,bosses:0,wins:0,playtime:0,bestKills:0,bestCombo:0,goldTotal:0,bestLevel:0,evos:0,fusions:0,weaponMaxed:0,noHitBest:0,locBest:{},heroBest:{},wpnDmg:{}},
     settings:{master:0.8, music:0.7, sfx:0.9, shake:1, hpbar:true, dmgnum:true, perf:_isTouch(), fps:false}};
 }
@@ -734,6 +734,7 @@ function sanitizeMeta(o){
   if(!m.heroes||typeof m.heroes!=='object') m.heroes={};
   m.heroes.hunter=true; // охотник всегда доступен
   if(!m.bestiary||typeof m.bestiary!=='object') m.bestiary={};
+  const lw={}; if(m.locWon&&typeof m.locWon==='object') for(const L of LOCS) if(m.locWon[L.id]) lw[L.id]=true; m.locWon=lw; // победы над боссами локаций (открывают следующие)
   if(!m.ach||typeof m.ach!=='object') m.ach={};
   if(!m.stats||typeof m.stats!=='object') m.stats={};
   for(const k of ['runs','kills','bosses','wins','playtime','bestKills','bestCombo','goldTotal','bestLevel','evos','fusions','weaponMaxed','noHitBest']) m.stats[k]=Number.isFinite(m.stats[k])?m.stats[k]:0;
@@ -1805,6 +1806,7 @@ function winGame(){
   run.earned=Math.max(0,Math.round(run.goldBonus*run.goldMul)); // золото = ТОЛЬКО собранные монеты (Заход 6)
   meta.gold+=run.earned; meta.stats.goldTotal=(meta.stats.goldTotal||0)+run.earned; checkAchievements(); // лайфтайм золото + скан ПОСЛЕ прибавки (ачивка «Богач», фикс ревью 8C)
   if(!meta.best||run.time>meta.best.time) meta.best={time:run.time,level:run.level,kills:s.kills};
+  (meta.locWon||(meta.locWon={}))[run.loc]=true; // победа над финальным боссом локации → открыта следующая
   saveMeta();
   A.bossDie(); shakeAdd(20);
   buildDeath(true);
@@ -3244,8 +3246,8 @@ function spawnBoss(idx, isFinal){
   const tier=idx+1;
   e.boss=tier; e.bkind=def.kind; e.name=def.name;
   const m=run.time/60;
-  e.maxhp=e.hp=Math.round(1100*Math.pow(tier,1.45)*DIFFICULTY.bossHp(m)*DIFFICULTY.mul);
-  e.r=42; e.spd=42; e.dmg=(15+7*tier)*DIFFICULTY.bossDmg(m)*DIFFICULTY.mul;
+  e.maxhp=e.hp=Math.round(1100*Math.pow(tier,1.45)*DIFFICULTY.bossHp(m)*DIFFICULTY.mul*DIFFICULTY.warm(m)); // warm → боссы слабее на ранних минутах (убиваемы), полная сила к 9:00
+  e.r=42; e.spd=42; e.dmg=(15+7*tier)*DIFFICULTY.bossDmg(m)*DIFFICULTY.mul*DIFFICULTY.warm(m);
   e.xp=Math.round(110*tier*(1+m*0.12));
   e.sumNext=true; e.a1=2.5; e.a2=6;
   if(isFinal){ e.final=true; e.maxhp=e.hp=Math.round(e.maxhp*1.6); e.r=50; e.dmg*=1.15; }
@@ -3372,10 +3374,11 @@ function director(dt){
   }
   // боссы — фиксированный порядок (план C); финал = босс-кап локации, его смерть = победа над ночью
   const cap=(LOCS.find(l=>l.id===run.loc)||LOCS[0]).boss;
-  if(!run.won&&run.bossIdx<=cap&&t>=run.bossT){
+  const bossAlive=!!(run.bossRef&&!run.bossRef.dead); // ОДИН БОСС ЗА РАЗ: следующий не придёт, пока текущий жив (нет накопления)
+  if(!run.won&&run.bossIdx<=cap&&t>=run.bossT&&!bossAlive){
     spawnBoss(run.bossIdx, run.bossIdx===cap);
     run.bossIdx++;
-    run.bossT+=BOSS_INTERVAL;
+    run.bossT=t+BOSS_INTERVAL; // следующий — не раньше интервала И только после убийства текущего
   }
 }
 
@@ -5059,9 +5062,10 @@ function buildHeroes(){
 }
 function buildPickLoc(){
   const g=$('pickLocGrid'); g.innerHTML='';
-  const best=meta.best?meta.best.time:0;
-  for(const L of LOCS){
-    if(best<L.req) continue; // закрытые локации скрыты
+  for(let i=0;i<LOCS.length;i++){
+    const L=LOCS[i];
+    const unlocked = i===0 || !!(meta.locWon&&meta.locWon[LOCS[i-1].id]); // открывается за победу над боссом ПРЕДЫДУЩЕЙ локации
+    if(!unlocked) continue;
     const el=document.createElement('div');
     el.className='locchip'+(meta.loc===L.id?' sel':'');
     el.innerHTML='<img class="loco" src="'+sprURL(SPR.locIco[L.id],'loc_'+L.id)+'" alt="">'+
