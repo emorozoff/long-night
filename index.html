@@ -314,7 +314,13 @@ body.ingame.idle,body.ingame.idle *{cursor:none!important;} /* курсор пр
   #deathGrid{font-size:13px;gap:4px 16px;}
   .deathtitle{font-size:38px;}
   #shopGrid{max-height:38vh;}
-  .mcard .hico{width:22px;height:27px;}        /* иконки выбора героя ещё в 2 раза меньше */
+  /* выбор героя на мобиле: компактные карточки в 2 колонки (≈квадратные) + БОЛЬШЕ иллюстрации */
+  #heroGrid{grid-template-columns:repeat(2,1fr);gap:8px;max-height:66vh;}
+  #heroGrid .mcard{padding:10px 8px;border-radius:10px;}
+  #heroGrid .hico{width:66px;height:79px;margin-bottom:6px;}
+  #heroGrid .mname{font-size:15px;letter-spacing:.5px;}
+  #heroGrid .mdesc{font-size:11px;line-height:1.35;margin:5px 0;}
+  #heroGrid .mcost{font-size:13px;margin-top:6px;}
   .title{font-size:min(60px,12vw);letter-spacing:3px;text-indent:3px;text-align:center;} /* заголовок ровно по центру */
   .titlewrap{display:block;text-align:center;}
   .subtitle{font-size:16px;}
@@ -464,7 +470,7 @@ body.ingame.idle,body.ingame.idle *{cursor:none!important;} /* курсор пр
    ===================================================================== */
 
 // ============================== UTILS ==============================
-const VERSION='0.85';
+const VERSION='0.86';
 const TAU = Math.PI*2;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const irand=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
