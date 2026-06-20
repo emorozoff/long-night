@@ -376,6 +376,7 @@ body.ingame.idle,body.ingame.idle *{cursor:none!important;} /* курсор пр
 </div>
 
 <div id="scrShop" class="screen">
+  <button class="btn" id="btnShopBack">НАЗАД</button>
   <h2 class="serif" style="font-size:36px;letter-spacing:6px;color:var(--gold)">СКЛЕП</h2>
   <div class="hint" style="margin-top:-6px">перманентные улучшения · действуют во всех забегах</div>
   <div class="goldrow">◆ <span id="shopGold">0</span></div>
@@ -383,7 +384,6 @@ body.ingame.idle,body.ingame.idle *{cursor:none!important;} /* курсор пр
   <div class="serif" style="color:var(--gold);letter-spacing:3px;font-size:15px;margin-top:10px">ПРОКАЧКА ОРУЖИЯ</div>
   <div class="hint" style="margin-top:-4px">тир 0→50 · база ×0.5 → потолок ×2.0 урона + фирменный охват</div>
   <div id="shopWGrid"></div>
-  <button class="btn" id="btnShopBack">НАЗАД</button>
 </div>
 
 <div id="scrBest" class="screen">
@@ -473,7 +473,7 @@ body.ingame.idle,body.ingame.idle *{cursor:none!important;} /* курсор пр
    ===================================================================== */
 
 // ============================== UTILS ==============================
-const VERSION='0.95';
+const VERSION='0.96';
 const TAU = Math.PI*2;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const irand=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
