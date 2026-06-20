@@ -478,7 +478,7 @@ body.ingame.idle,body.ingame.idle *{cursor:none!important;} /* курсор пр
    ===================================================================== */
 
 // ============================== UTILS ==============================
-const VERSION='0.91';
+const VERSION='0.92';
 const TAU = Math.PI*2;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const irand=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
@@ -703,6 +703,7 @@ const META_DEFS=[
   {id:'spd', name:'Прыть',          desc:'+4% к скорости',                       base:25,  mul:1.7, max:6},
   {id:'mag', name:'Притяжение',     desc:'+12% радиус сбора кристаллов',         base:20,  mul:1.6, max:6},
   {id:'reg', name:'Восстановление', desc:'+0.3 HP/с регенерации',                base:35,  mul:1.8, max:5},
+  {id:'vmp', name:'Святая жажда',   desc:'+1.5% урона лечит (вампиризм)',         base:50,  mul:1.8, max:5},
   {id:'grd', name:'Жадность',       desc:'+15% золота за забег',                 base:40,  mul:1.8, max:6},
   {id:'xpb', name:'Мудрость',       desc:'+8% опыта',                            base:35,  mul:1.8, max:6},
   {id:'rrl', name:'Переброс',       desc:'+1 переброс на левел-апе (старт 0)',   base:80,  mul:2,   max:3},
@@ -771,7 +772,7 @@ function metaBonus(){
   return {
     hp:20*metaLv('vit'), dmg:0.06*metaLv('pow'), spd:0.04*metaLv('spd'),
     mag:0.12*metaLv('mag'), reg:0.3*metaLv('reg'), gold:0.15*metaLv('grd'),
-    xp:0.08*metaLv('xpb'), rev:metaLv('rev'), rerolls:metaLv('rrl'),
+    xp:0.08*metaLv('xpb'), rev:metaLv('rev'), rerolls:metaLv('rrl'), leech:0.5*metaLv('vmp'),
   };
 }
 function exportMeta(){return JSON.stringify(meta);}
@@ -1433,7 +1434,7 @@ function newRun(){
     loc:L.id, hero:H.id,
     p:{x:0,y:0,r:12,hp:maxhp,maxhp:maxhp,face:1,
        spdMul:1+mb.spd+(m.spd||0), regen:mb.reg, magBase:38, magMul:1+mb.mag,
-       dmgMul:1+mb.dmg+(m.dmg||0), cdMul:1, crit:0, armor:(m.armor||0), leech:0, inv:0, god:false},
+       dmgMul:1+mb.dmg+(m.dmg||0), cdMul:1, crit:0, armor:(m.armor||0), leech:(mb.leech||0), inv:0, god:false},
     revives:mb.rev, xpMul:1+mb.xp, goldMul:(1+mb.gold)*(1+L.gold), locDiff:L.diff||1,
     heartMul:1, heartDrop:0,
     weapons:{bolt:0,orbit:0,chain:0,aura:0,scythe:0,mortar:0,bell:0,lantern:0,sword:0},
