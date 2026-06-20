@@ -77,7 +77,7 @@ h1,h2,.serif{font-family:var(--pix);}
 .title{font-family:var(--pix);font-size:min(104px,15vw);letter-spacing:4px;margin:0;line-height:1;color:#c01524;
   background-image:var(--titletex),linear-gradient(180deg,#f44a57 0%,#d81f30 44%,#8f1019 100%);
   -webkit-background-clip:text;background-clip:text;-webkit-text-fill-color:transparent;
-  text-shadow:0 0 12px rgba(150,12,22,0.38),0 3px 0 #2a0810,0 5px 14px #000;animation:titlepulse 1.8s ease-in-out infinite;}
+  text-shadow:0 3px 0 #2a0810,0 5px 14px #000;}
 @keyframes titlepulse{0%,100%{text-shadow:0 0 10px rgba(150,12,22,0.34),0 3px 0 #2a0810,0 5px 14px #000}
   50%{text-shadow:0 0 16px rgba(168,18,30,0.42),0 3px 0 #2a0810,0 5px 14px #000}}
 .subtitle{font-family:var(--pix);color:var(--dim);letter-spacing:3px;font-size:20px;margin-top:-2px;}
@@ -127,7 +127,11 @@ h1,h2,.serif{font-family:var(--pix);}
 .toggle.on{background:#3a1520;border-color:var(--red);}
 .toggle.on::after{left:34px;background:var(--gold);}
 .vertag{color:var(--dim);font-size:12px;letter-spacing:3px;margin-top:-4px;}
-#verCorner{position:fixed;left:0;bottom:0;z-index:60;color:rgba(150,130,140,0.45);font-size:11px;letter-spacing:1px;pointer-events:auto;cursor:pointer;padding:24px 40px 9px 12px;-webkit-tap-highlight-color:transparent;}
+#verCorner{position:fixed;left:0;bottom:0;z-index:60;color:rgba(150,130,140,0.45);font-size:11px;letter-spacing:1px;pointer-events:none;padding:24px 40px 9px 12px;-webkit-tap-highlight-color:transparent;}
+#btnSpeed{position:fixed;left:10px;bottom:10px;z-index:60;display:none;align-items:center;justify-content:center;min-width:46px;padding:7px 12px;background:rgba(20,12,18,0.72);border:1px solid #5a3a48;border-radius:6px;color:#9a8a92;font-family:var(--pix);font-size:15px;letter-spacing:1px;pointer-events:auto;cursor:pointer;-webkit-tap-highlight-color:transparent;}
+#btnSpeed.on{color:#e7c24a;border-color:#7a5a30;}
+body.ingame #btnSpeed{display:flex;}      /* в игре снизу слева — кнопка скорости */
+body.ingame #verCorner{display:none;}     /* в игре версию не показываем (там кнопка скорости) */
 #devPanel{position:fixed;inset:0;z-index:200;background:rgba(8,8,12,0.93);color:#cde;font:12px/1.4 ui-monospace,monospace;padding:10px 12px 40px;overflow:auto;display:none;}
 #devPanel.show{display:block;}
 #devPanel h3{margin:2px 0 6px;font:bold 14px monospace;color:#7ad4ff;letter-spacing:1px;}
@@ -352,6 +356,7 @@ body.ingame.idle,body.ingame.idle *{cursor:none!important;} /* курсор пр
 <div id="achPops"></div>
 <div id="btnPauseTouch">❚❚</div>
 <div id="verCorner"></div>
+<div id="btnSpeed">×1.5</div>
 <div id="devPanel"></div>
 <div id="btnFull" title="Полный экран">⛶</div>
 
@@ -422,6 +427,7 @@ body.ingame.idle,body.ingame.idle *{cursor:none!important;} /* курсор пр
     <div class="setrow"><label>ЦИФРЫ УРОНА</label><button class="toggle" id="tgDmg"></button></div>
     <div class="setrow"><label>ОПТИМИЗАЦИЯ</label><button class="toggle" id="tgPerf"></button></div>
     <div class="setrow"><label>СЧЁТЧИК FPS</label><button class="toggle" id="tgFps"></button></div>
+    <div class="setrow"><label>ПАНЕЛЬ РАЗРАБОТЧИКА</label><button class="btn" id="btnDevPanel" style="padding:6px 18px;font-size:14px">ОТКРЫТЬ</button></div>
     <div class="setrow" style="margin-top:16px"><label style="color:#e07088">СБРОС ПРОГРЕССА</label><button class="btn" id="btnReset" style="padding:6px 18px;font-size:18px;border-color:#7a2433;color:#e07088">×5</button></div>
   </div>
   <button class="btn" id="btnSaveToggle" style="font-size:13px;padding:8px 18px;margin-top:10px">СОХРАНЕНИЕ / ЗАГРУЗКА ⏷</button>
@@ -473,7 +479,7 @@ body.ingame.idle,body.ingame.idle *{cursor:none!important;} /* курсор пр
    ===================================================================== */
 
 // ============================== UTILS ==============================
-const VERSION='0.97';
+const VERSION='0.98';
 const TAU = Math.PI*2;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const irand=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
@@ -4748,7 +4754,7 @@ function drawMenuAmbient(){
   if(menuBgReady && img.naturalWidth){
     const iw=img.naturalWidth, ih=img.naturalHeight, sc=Math.max(W/iw,H/ih);
     dw=iw*sc; dh=ih*sc;
-    const portrait=W<H*0.9, ax=portrait?0.60:0.5, ay=portrait?0.42:0.5;
+    const portrait=W<H*0.9, ax=portrait?0.45:0.5, ay=portrait?0.42:0.5; // мобайл: сдвиг влево, чтобы был виден замок (Заход 32)
     dx=(W-dw)*ax; dy=(H-dh)*ay;
     ctx.drawImage(img,dx,dy,dw,dh);
   } else { ctx.fillStyle='#0a0e1a'; ctx.fillRect(0,0,W,H); }
@@ -4897,7 +4903,8 @@ const MUSIC={
 };
 
 // ============================== MAIN LOOP ==============================
-const GAMESPEED=1.5; // постоянное ускорение ВСЕЙ игры (как таймскейл дев-панели). Крути ЗДЕСЬ. (Заход 9)
+const GAMESPEED=1.5; // ускорение игры (кнопка ×1.5 на экране игры). Крути ЗДЕСЬ. (Заход 9)
+let speedFast=true;  // кнопка ×1.5 на экране игры (Заход 32): true=×1.5, false=×1
 let lastTS=0;
 const fpsBuf=new Float32Array(90); let fpsI=0; let _fps=60; let _lowperf=false; // авто-перф при просадке FPS (моб.) // _fps — бегущий FPS для адаптивных каппов (Заход 7)
 // ============================== DEV-ПАНЕЛЬ (секретный жест: 5 тапов по версии) ==============================
@@ -4951,7 +4958,8 @@ function devAction(act,arg){
     case 'xpclear': window.__xplog=[]; { const di=$('devInfo'); if(di) di.textContent='XP-лог очищен'; } break;
   }
 }
-function devTapVersion(){ toggleDev(true); } // дев-панель открывается с ОДНОГО нажатия по версии
+function devTapVersion(){ toggleDev(true); } // (устар.) дев-панель теперь открывается из настроек
+function toggleSpeed(){ speedFast=!speedFast; const b=$('btnSpeed'); if(b){ b.textContent=speedFast?'×1.5':'×1'; b.classList.toggle('on',speedFast); } try{A.click();}catch(e){} } // кнопка ускорения игры (Заход 32)
 function loop(ts){
   requestAnimationFrame(loop);
   if(!lastTS)lastTS=ts;
@@ -4960,7 +4968,7 @@ function loop(ts){
   fpsBuf[fpsI++%90]=dt;
   if((fpsI&7)===0){ let _s=0,_c=0; for(const v of fpsBuf){ if(v>0){ _s+=v; _c++; } } _fps=_c&&_s>0?_c/_s:60; _lowperf=_fps<38?true:(_fps>52?false:_lowperf); } // адаптивный FPS + авто-перф (моб.)
   if(hitStop>0) hitStop-=dt;
-  if(state==='playing'&&run) update(Math.min(dt,0.05/GAMESPEED)*((hitStop>0&&!PERF())?0.12:1)*GAMESPEED*devTimescale); // кламп ДО ×1.5 → эфф. макс-шаг 0.05 (анти-туннель); hit-stop выкл в перф (Заход 28)
+  if(state==='playing'&&run) update(Math.min(dt,0.05/GAMESPEED)*((hitStop>0&&!PERF())?0.12:1)*(speedFast?GAMESPEED:1)*devTimescale); // кламп ДО ×1.5 → эфф. макс-шаг 0.05 (анти-туннель); hit-stop выкл в перф (Заход 28)
   if(!(state==='paused'||state==='levelup')) render(); // не перерисовываем замороженный мир на паузе/левел-апе (Заход 28)
   A.intensity=(state==='playing'&&run)
     ? clamp(0.22+run.time/420*0.55+run.en.length/300*0.2+(run.bossRef&&!run.bossRef.dead?0.15:0),0,1)
@@ -5321,7 +5329,9 @@ window.__game={
 // PWA: установка на телефон + офлайн после первой загрузки
 if('serviceWorker' in navigator){ addEventListener('load',()=>navigator.serviceWorker.register('sw.js').catch(()=>{})); }
 $('verCorner').textContent='v'+VERSION;
-$('verCorner').addEventListener('click', devTapVersion);
+$('btnDevPanel').onclick=()=>{ try{A.click();}catch(e){} toggleDev(true); }; // дев-панель из настроек (Заход 32)
+$('btnSpeed').textContent=speedFast?'×1.5':'×1'; if(speedFast)$('btnSpeed').classList.add('on');
+$('btnSpeed').onclick=toggleSpeed;
 $('devPanel').addEventListener('click', e=>{ const b=e.target.closest('button[data-act]'); if(b) devAction(b.dataset.act, b.dataset.arg); });
 { const mi=SPR.menuIco; $('icoShop').src=sprURL(mi.shop,'mi_s'); $('icoStats').src=sprURL(mi.stats,'mi_t'); $('icoBest').src=sprURL(mi.best,'mi_b'); $('icoSet').src=sprURL(mi.set,'mi_g'); }
 // процедурные UI-текстуры и пиксельный курсор — генерим один раз на старте
