@@ -464,7 +464,7 @@ body.ingame.idle,body.ingame.idle *{cursor:none!important;} /* курсор пр
    ===================================================================== */
 
 // ============================== UTILS ==============================
-const VERSION='0.79';
+const VERSION='0.80';
 const TAU = Math.PI*2;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const irand=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
@@ -1701,6 +1701,7 @@ function applySlow(e,f,t){
 // ============================== COMBAT ==============================
 // ===== ПРОКАЧКА ОРУЖИЯ В СКЛЕПЕ (тир 0-50, Заход 10) =====
 const WSET=new Set(['bolt','orbit','chain','aura','scythe','mortar','bell','lantern','sword']);
+const WDMG=0.7; // глобальный множитель урона ВСЕГО оружия (−30%, баланс Заход 14; ручка тюнинга)
 function wcTier(id){ return (meta.wcrypt&&meta.wcrypt[id])||0; }
 function wcDmg(src){ if(!WSET.has(src)) return 1; return 0.5+0.03*wcTier(src); }  // урон оружия: тир 0→50 = ×0.5→×2.0
 function wcSig(id){ return 1+0.01*wcTier(id); }                                   // фирменный стат (охват/радиус/дальность): ×1.0→×1.5
@@ -1708,6 +1709,7 @@ function damageEnemy(e,dmg,src,kx,ky){
   if(e.dead||!run) return;
   if(e.invuln&&src!=='dev'){ if(meta.settings.dmgnum&&chance(0.2)) addText(e.x,e.y-e.r-6,'×','#9a8aff',16); return; } // Мёртвый король: неуязвим, пока факелы не зажжены (dev-удар проходит)
   dmg*=wcDmg(src); // множитель Склепа: база ×0.5 → потолок ×2.0 (Заход 10)
+  if(WSET.has(src)) dmg*=WDMG; // −30% урон всего оружия (Заход 14); burn/bleed наследуют от уменьшённого удара
   let crit=false;
   if(run.p.crit>0&&Math.random()<run.p.crit){dmg*=2;crit=true;}
   dmg=Math.max(1,Math.round(dmg*rand(0.92,1.08)));
@@ -2064,7 +2066,7 @@ function fireWeapons(dt){
           run.pb.push({x:p.x,y:p.y,vx:Math.cos(a)*560,vy:Math.sin(a)*560,dmg,pierce:pr,r:evo?6:5,life:1.7,hit:{},evo});
         }
         A.shoot();
-        wt.bolt=Math.max(0.4,0.98-0.06*lv)*p.cdMul*(evo?0.85:1);
+        wt.bolt=2*Math.max(0.4,0.98-0.06*lv)*p.cdMul*(evo?0.85:1); // ÷2 скорострельность арбалета (баланс Заход 14)
       }
     }
   }
