@@ -478,7 +478,7 @@ body.ingame.idle,body.ingame.idle *{cursor:none!important;} /* курсор пр
    ===================================================================== */
 
 // ============================== UTILS ==============================
-const VERSION='0.90';
+const VERSION='0.91';
 const TAU = Math.PI*2;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const irand=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
@@ -2205,7 +2205,7 @@ function fireWeapons(dt){
           // КОПЬЁ СВЕТА: тонкая линия, уходит чуть за экран, жжёт ВСЕХ на пути
           wt.lantern=0.09;
           const a=run.lanternAim, ca=Math.cos(a), sa=Math.sin(a);
-          const beamLen=Math.hypot(W,H)*0.62/ZOOM, halfW=15, dmg=(9+5*lv)*p.dmgMul;
+          const beamLen=Math.hypot(W,H)*0.62/ZOOM, halfW=30, dmg=(9+5*lv)*p.dmgMul; // ширина луча ×2 (Заход 25): ровный луч, не конус
           run.lanternBeam={x:p.x,y:p.y,a,len:beamLen,t:0.09,max:0.09};
           for(const e of run.en){
             if(e.dead) continue;
@@ -3834,9 +3834,9 @@ function drawZones(){
     // КОПЬЁ СВЕТА: тонкий яркий луч (уходит за экран)
     const b=run.lanternBeam, al=Math.max(0,b.t/b.max), ex=b.x+Math.cos(b.a)*b.len, ey=b.y+Math.sin(b.a)*b.len;
     ctx.save(); ctx.globalCompositeOperation='lighter'; ctx.lineCap='round';
-    ctx.strokeStyle='rgba(255,236,150,'+(0.6*al).toFixed(2)+')'; ctx.lineWidth=11;
+    ctx.strokeStyle='rgba(255,236,150,'+(0.6*al).toFixed(2)+')'; ctx.lineWidth=22;
     ctx.beginPath(); ctx.moveTo(b.x,b.y); ctx.lineTo(ex,ey); ctx.stroke();
-    ctx.strokeStyle='rgba(255,255,255,'+(0.95*al).toFixed(2)+')'; ctx.lineWidth=3;
+    ctx.strokeStyle='rgba(255,255,255,'+(0.95*al).toFixed(2)+')'; ctx.lineWidth=6;
     ctx.beginPath(); ctx.moveTo(b.x,b.y); ctx.lineTo(ex,ey); ctx.stroke();
     ctx.restore();
   } else if(run.weapons.lantern>0 && run.lanternOn){ // гаснет, если рядом нет цели (Заход 8A)
