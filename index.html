@@ -478,7 +478,7 @@ body.ingame.idle,body.ingame.idle *{cursor:none!important;} /* курсор пр
    ===================================================================== */
 
 // ============================== UTILS ==============================
-const VERSION='0.88';
+const VERSION='0.89';
 const TAU = Math.PI*2;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const irand=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
@@ -2463,7 +2463,7 @@ BOSS_MECH.matron=function(e,dt,dx,dy,d,sf){
   const f=e.hp/e.maxhp;
   e.phase=f>0.5?0:f>0.25?1:2;
   // движение: держит дистанцию, медленно убегает от игрока
-  const want=320, spd=(40+e.boss*1.5)*1.4; // скорость +40% (Заход 5)
+  const want=320, spd=(40+e.boss*1.5)*1.4*0.8; // скорость +40% (Заход 5), затем −20% (Заход 23)
   let mvx=0,mvy=0;
   if(d<want){ mvx=-dx/d*spd; mvy=-dy/d*spd; }
   else if(d>want+170){ mvx=dx/d*spd*0.4; mvy=dy/d*spd*0.4; }
@@ -2474,8 +2474,8 @@ BOSS_MECH.matron=function(e,dt,dx,dy,d,sf){
   e.a2-=dt;
   if(e.a2<=0){
     e.a2=[3.4,2.6,1.9][e.phase];
-    if(gnats<210){ // ×3 мошки: потолок 70→210 (Заход 5)
-      const n=[12,18,27][e.phase];
+    if(gnats<168){ // потолок 210, затем −20% → 168 (Заход 23)
+      const n=[10,14,22][e.phase]; // выводок −20% (Заход 23)
       for(let i=0;i<n;i++){
         const a=rand(0,TAU), rr=e.r+rand(6,28);
         const gg=spawnEnemy('gnat',e.x+Math.cos(a)*rr,e.y+Math.sin(a)*rr,{noScale:true});
@@ -2487,7 +2487,7 @@ BOSS_MECH.matron=function(e,dt,dx,dy,d,sf){
   // вход в фазу 2 (33% HP) — разовый большой выброс
   if(e.phase===2&&!e.burst2){
     e.burst2=true;
-    for(let i=0;i<54;i++){ const a=i/54*TAU; const gg=spawnEnemy('gnat',e.x+Math.cos(a)*30,e.y+Math.sin(a)*30,{noScale:true}); gg.xp=0; gg.kx=Math.cos(a)*210; gg.ky=Math.sin(a)*210; } // ×3 выброс (Заход 5)
+    for(let i=0;i<43;i++){ const a=i/43*TAU; const gg=spawnEnemy('gnat',e.x+Math.cos(a)*30,e.y+Math.sin(a)*30,{noScale:true}); gg.xp=0; gg.kx=Math.cos(a)*210; gg.ky=Math.sin(a)*210; } // выброс фазы 2: 54→43 (−20%, Заход 23)
     addBurst(e.x,e.y,'#a93a6e',26,200,0.6,3); A.roar(); shakeAdd(8);
   }
 };
