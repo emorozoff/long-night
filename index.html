@@ -422,7 +422,6 @@ body.ingame.idle,body.ingame.idle *{cursor:none!important;} /* курсор пр
     <div class="setrow"><label>МУЗЫКА</label><input type="range" id="volMusic" min="0" max="100"><span class="setval" id="valMusic"></span></div>
     <div class="setrow"><label>ЭФФЕКТЫ</label><input type="range" id="volSfx" min="0" max="100"><span class="setval" id="valSfx"></span></div>
     <div class="setsec">ИГРА</div>
-    <div class="setrow"><label>ТРЯСКА КАМЕРЫ</label><button class="toggle" id="tgShake"></button></div>
     <div class="setrow"><label>HP-БАР У ГЕРОЯ</label><button class="toggle" id="tgHp"></button></div>
     <div class="setrow"><label>ЦИФРЫ УРОНА</label><button class="toggle" id="tgDmg"></button></div>
     <div class="setrow"><label>РЕЖИМ ПРОИЗВОДИТЕЛЬНОСТИ</label><button class="toggle" id="tgPerf"></button></div>
@@ -478,7 +477,7 @@ body.ingame.idle,body.ingame.idle *{cursor:none!important;} /* курсор пр
    ===================================================================== */
 
 // ============================== UTILS ==============================
-const VERSION='0.92';
+const VERSION='0.93';
 const TAU = Math.PI*2;
 const rand=(a,b)=>a+Math.random()*(b-a);
 const irand=(a,b)=>Math.floor(a+Math.random()*(b-a+1));
@@ -515,8 +514,7 @@ addEventListener('resize',resize); resize();
 
 let state='menu';      // menu | shop | settings | playing | paused | levelup | dead
 let run=null;          // состояние текущего забега
-let shake=0, _shkX=0, _shkY=0, _shkLast=0;
-function shakeAdd(p){shake=Math.min(15,shake+p);}
+function shakeAdd(p){} // тряска камеры удалена целиком (Заход 27) — вызовы остаются безопасными no-op
 let hitStop=0;
 function hitStopAdd(t){hitStop=Math.max(hitStop,Math.min(0.09,t));} // короткий слоумо на крупных ударах
 function flashGold(){ const f=document.getElementById('goldflash'); if(!f) return; f.style.transition='none'; f.style.opacity='0.85'; requestAnimationFrame(()=>{ f.style.transition='opacity .5s'; f.style.opacity='0'; }); }
@@ -715,7 +713,7 @@ const ZOOM=MOBILE?0.78:1;                // зум-аут камеры на мо
 function defaultMeta(){
   return {gold:0, up:{}, wcrypt:{}, best:null, loc:'grave', hero:'hunter', heroes:{hunter:true}, bestiary:{}, ach:{}, locWon:{},
     stats:{runs:0,kills:0,bosses:0,wins:0,playtime:0,bestKills:0,bestCombo:0,goldTotal:0,bestLevel:0,evos:0,fusions:0,weaponMaxed:0,noHitBest:0,locBest:{},heroBest:{},wpnDmg:{}},
-    settings:{master:0.8, music:0.7, sfx:0.9, shake:1, hpbar:true, dmgnum:true, perf:_isTouch(), fps:false}};
+    settings:{master:0.8, music:0.7, sfx:0.9, hpbar:true, dmgnum:true, perf:_isTouch(), fps:false}};
 }
 // «переменная сессии» — основное хранилище; localStorage — необязательный бэкап
 function sanitizeMeta(o){
@@ -737,7 +735,7 @@ function sanitizeMeta(o){
       if(Number.isFinite(v)) wc[id]=clamp(Math.floor(v),0,50);
     }
   m.wcrypt=wc;
-  for(const k of ['master','music','sfx','shake'])
+  for(const k of ['master','music','sfx'])
     m.settings[k]=Number.isFinite(m.settings[k])?clamp(m.settings[k],0,1):d.settings[k];
   for(const k of ['hpbar','dmgnum','perf','fps'])
     m.settings[k]=(k in (o.settings||{}))?!!m.settings[k]:d.settings[k];
@@ -3679,7 +3677,6 @@ function update(dt){
   updateFxArr(dt);
   director(dt);
   sweep(run.en);sweep(run.pb);sweep(run.eb);sweep(run.gems);sweep(run.parts);sweep(run.texts);sweep(run.fx);
-  shake=Math.max(0,shake-shake*6*dt-2*dt);
   run.noHitT+=dt; if(run.noHitT>run.noHitMax) run.noHitMax=run.noHitT; // «без царапины» (8C)
   run.achCheckT-=dt; if(run.achCheckT<=0){ run.achCheckT=1.0; checkAchievementsLive(); } // live-разблокировка ачивок в бою (8C)
   refreshHud();
@@ -4635,10 +4632,7 @@ function render(){
   let px,py;
   if(run){px=run.p.x;py=run.p.y;}
   else{const t=performance.now()*0.00006;px=Math.cos(t)*250;py=Math.sin(t*1.3)*180;}
-  const shk=(state==='playing')?shake*meta.settings.shake/1.5:0; // пауза — без тряски; амплитуда ×(1/1.5)
-  const now=performance.now();
-  if(now-_shkLast>25){ _shkLast=now; _shkX=Math.random()*2-1; _shkY=Math.random()*2-1; } // ~1.5× медленнее
-  const sx=_shkX*shk, sy=_shkY*shk;
+  const sx=0, sy=0; // тряска камеры удалена целиком (Заход 27)
   ctx.save();
   if(ZOOM!==1){ ctx.translate(Math.round(W/2+sx),Math.round(H/2+sy)); ctx.scale(ZOOM,ZOOM); ctx.translate(Math.round(-px),Math.round(-py)); } // зум-аут (мобайл, Заход 10)
   else ctx.translate(Math.round(W/2-px+sx),Math.round(H/2-py+sy)); // целые пиксели — нет швов между тайлами
@@ -5010,7 +5004,6 @@ function syncSettingsUI(){
   const s=meta.settings;
   const pct=(id,v)=>{$(id).value=Math.round(v*100); $('val'+id.replace('vol','').replace('set','')).textContent=Math.round(v*100)+'%';};
   pct('volMaster',s.master); pct('volMusic',s.music); pct('volSfx',s.sfx);
-  $('tgShake').classList.toggle('on',s.shake>0);
   const rb=$('btnReset'); if(rb){ rb.dataset.ctr=5; rb.textContent='×5'; }
   $('tgHp').classList.toggle('on',s.hpbar);
   $('tgDmg').classList.toggle('on',s.dmgnum);
@@ -5025,7 +5018,6 @@ function openSettings(from){
 function closeSettings(){ setState(settingsFrom==='paused'?'paused':'menu'); }
 function startRun(){
   run=newRun();
-  shake=0;
   grid.clear(); // не тащим призраков прошлого забега
   // стартовое кольцо упырей, чтобы бой начинался сразу
   for(let i=0;i<8;i++){
@@ -5278,7 +5270,6 @@ function bindSlider(id,key,after){
 bindSlider('volMaster','master');
 bindSlider('volMusic','music');
 bindSlider('volSfx','sfx',()=>A.click());
-$('tgShake').onclick=()=>{meta.settings.shake=meta.settings.shake>0?0:1;syncSettingsUI();saveMeta();A.click();};
 function bindToggle(id,key){
   $(id).onclick=()=>{meta.settings[key]=!meta.settings[key];syncSettingsUI();saveMeta();A.click();};
 }

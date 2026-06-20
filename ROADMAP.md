@@ -507,6 +507,11 @@ menu/shop/settings/playing/paused/levelup/dead.
 - **0.29 «Орда гуще»:** выбранные владельцем новые враги (до 20+ типов).
 
 ## Журнал версий
+### 0.93 — Заход 27: тряска камеры удалена целиком
+- Убрана функция тряски камеры полностью: state `let shake,_shkX,_shkY,_shkLast` удалён, `shakeAdd` → no-op (≈30 вызовов остаются безопасными), декей в update убран, в render `sx/sy=0` (камера не смещается), сброс `shake=0` в startRun убран.
+- UI: тоггл «ТРЯСКА КАМЕРЫ» убран из настроек (+ wiring `tgShake` onclick/sync). meta: поле `settings.shake` убрано из defaultMeta и sanitize-клампа.
+- Проверено: 0 остаточных ссылок (grep), игра стартует, боссовый `shakeAdd` не падает, render без ошибок, тоггла нет (соседний HP цел). sw CACHE→0.93.
+
 ### 0.92 — Заход 26: новое улучшение Склепа «Святая жажда» (вампиризм)
 - Новое перма-улучшение `META_DEFS` id `vmp` «Святая жажда» (+1.5% урона лечит, base 50, mul 1.8, max 5). Даёт стартовый `run.p.leech` через ту же механику, что пассивка «Чаша Грааля» (`leechPool += dmg*0.03*leech`).
 - `metaBonus().leech = 0.5*metaLv('vmp')` (0.5 leech/ур = 1.5% lifesteal); newRun `leech:0`→`leech:(mb.leech||0)`. sanitizeMeta авто-клампит (итерирует META_DEFS).
